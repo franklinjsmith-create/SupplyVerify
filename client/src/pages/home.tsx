@@ -208,7 +208,7 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="container max-w-5xl mx-auto px-4 md:px-6 lg:px-8 py-8 md:py-12">
+      <main className="container max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-8 md:py-12">
         <Card className="mb-8">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">Upload Operation Data</CardTitle>
@@ -292,7 +292,7 @@ export default function Home() {
       </main>
 
       <footer className="border-t border-border bg-card mt-16">
-        <div className="container max-w-7xl px-4 md:px-6 lg:px-8 py-6">
+        <div className="container max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6">
           <p className="text-sm text-muted-foreground text-center">
             Data sourced from the{" "}
             <a

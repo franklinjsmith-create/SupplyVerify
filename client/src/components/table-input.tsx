@@ -122,7 +122,7 @@ export function TableInput({ onSubmit, disabled }: TableInputProps) {
         </Table>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <Button
           variant="outline"
           onClick={handleAddRow}
@@ -134,8 +134,8 @@ export function TableInput({ onSubmit, disabled }: TableInputProps) {
           Add Row
         </Button>
 
-        <p className="text-xs text-muted-foreground">
-          Enter the 10-digit NOP ID and comma-separated products for each operation
+        <p className="text-xs text-muted-foreground text-left sm:text-right max-w-md">
+          Enter the 10-digit NOP ID and comma-separated products for each operation. Products are optional.
         </p>
       </div>
 
