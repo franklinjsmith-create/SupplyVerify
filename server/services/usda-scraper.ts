@@ -133,31 +133,47 @@ export async function scrapeUSDAPage(oidNumber: string): Promise<CertificationDa
       const certifiedProducts: string[] = [];
       
       if (scopeData.certified_products && scopeData.certified_products !== "--") {
-        // Split by commas, semicolons, newlines, or multiple spaces
-        // But not within parentheses for comma case
-        let productList: string[] = [];
+        // USDA format: "Category1: item1, item2; Category2: item3, item4"
+        // Track normalized names to prevent duplicates
+        const normalizedSet = new Set<string>();
         
-        // First try splitting by commas (but not within parentheses)
-        const commaSplit = scopeData.certified_products.split(/,(?![^()]*\))/);
+        // Split by semicolons first (separates major category groups)
+        let categoryGroups = scopeData.certified_products.split(';');
         
-        // If we only got one item, try other delimiters
-        if (commaSplit.length === 1) {
-          // Try splitting by semicolons, newlines, tabs, or 3+ spaces
-          productList = scopeData.certified_products
-            .split(/[;\n\r\t]|(?:\s{3,})/)
-            .map(p => p.trim())
-            .filter(p => p.length > 0);
-        } else {
-          productList = commaSplit.map(p => p.trim());
+        // If no semicolons, try newlines as fallback (replace array, don't mutate)
+        if (categoryGroups.length === 1 && scopeData.certified_products.includes('\n')) {
+          categoryGroups = scopeData.certified_products.split(/[\n\r]+/).filter(g => g.trim());
         }
         
-        productList.forEach(product => {
-          if (product && product.length > 2) {
-            const normalized = normalizeProductName(product);
-            if (normalized && !certifiedProducts.includes(normalized)) {
-              certifiedProducts.push(normalized);
-            }
+        categoryGroups.forEach(group => {
+          const trimmedGroup = group.trim();
+          if (!trimmedGroup) return;
+          
+          // Check if this group has a category prefix (e.g., "Extracts/Flavors: ...")
+          // Split at the first colon to separate category from items
+          const colonIndex = trimmedGroup.indexOf(':');
+          let itemsText = trimmedGroup;
+          
+          if (colonIndex > 0) {
+            // Extract items after the colon
+            itemsText = trimmedGroup.substring(colonIndex + 1).trim();
           }
+          
+          // Split items by commas (but not within parentheses)
+          const items = itemsText.split(/,(?![^()]*\))/);
+          
+          items.forEach(item => {
+            const trimmedItem = item.trim();
+            if (trimmedItem && trimmedItem.length > 2) {
+              // Normalize for deduplication only
+              const normalized = normalizeProductName(trimmedItem);
+              if (normalized && !normalizedSet.has(normalized)) {
+                normalizedSet.add(normalized);
+                // Store ORIGINAL text for display (preserves parentheses)
+                certifiedProducts.push(trimmedItem);
+              }
+            }
+          });
         });
       }
       
