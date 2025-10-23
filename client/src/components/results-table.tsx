@@ -45,8 +45,9 @@ export function ResultsTable({ results }: ResultsTableProps) {
 
   return (
     <div className="rounded-md border border-border bg-card">
-      <ScrollArea className="w-full">
-        <Table>
+      <ScrollArea className="w-full overflow-auto">
+        <div className="min-w-[1400px]">
+          <Table>
           <TableHeader className="sticky top-0 bg-card z-10">
             <TableRow>
               <TableHead className="min-w-[180px]">Operation</TableHead>
@@ -189,6 +190,7 @@ export function ResultsTable({ results }: ResultsTableProps) {
             ))}
           </TableBody>
         </Table>
+        </div>
       </ScrollArea>
     </div>
   );

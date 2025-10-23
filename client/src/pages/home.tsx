@@ -162,8 +162,10 @@ export default function Home() {
       "NOP ID": result.nop_id,
       "Certifier": result.certifier,
       "Status": result.certification_status,
+      "Effective Date": result.effective_date,
       "Matching Products": result.matching_products.join(", "),
       "Missing Products": result.missing_products.join(", "),
+      "All Certified Products": result.all_certified_products.join(", "),
       "Source URL": result.source_url,
     }));
 
