@@ -156,19 +156,29 @@ export function parseTextInput(text: string): ParsedOperationData {
 
       // Handle different input formats:
       // 1 part: NOP ID only
-      // 2 parts: NOP ID | Products
+      // 2 parts: Could be "Operation Name | NOP ID" OR "NOP ID | Products"
       // 3+ parts: Operation Name | NOP ID | Products
       let operationName = "";
       let nopId = "";
       let productsRaw = "";
 
+      // Helper to detect if a string looks like a NOP ID (10 digits)
+      const looksLikeNopId = (str: string) => /^\d{10}$/.test(str.trim());
+
       if (parts.length === 1) {
         // Just NOP ID
         nopId = parts[0];
       } else if (parts.length === 2) {
-        // NOP ID | Products
-        nopId = parts[0];
-        productsRaw = parts[1];
+        // Disambiguate: Check if first part is a NOP ID
+        if (looksLikeNopId(parts[0])) {
+          // Format: NOP ID | Products
+          nopId = parts[0];
+          productsRaw = parts[1];
+        } else {
+          // Format: Operation Name | NOP ID
+          operationName = parts[0];
+          nopId = parts[1];
+        }
       } else {
         // Operation Name | NOP ID | Products
         operationName = parts[0];
