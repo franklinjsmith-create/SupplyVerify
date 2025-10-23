@@ -57,12 +57,20 @@ Preferred communication style: Simple, everyday language.
 
 ### Data Flow
 
-1. User uploads file or pastes text → Frontend validates format
-2. Data sent to `/api/verify` endpoint → Backend parses and validates supplier data
-3. For each supplier, backend scrapes USDA OID page using OID number
-4. Certification data extracted and compared against requested ingredients
-5. Results aggregated and returned with matching/missing ingredient lists
-6. Frontend displays summary statistics and detailed table of results
+**Input Methods:**
+1. **Manual Table Entry**: Users enter NOP ID# and ingredients directly in a dynamic table interface with add/remove row functionality
+2. **File Upload**: Users upload CSV/XLSX files with supplier data (drag & drop or click to browse)
+
+**Processing:**
+1. Table input converts to pipe-delimited format: `Supplier | {nopId} | {ingredients}`
+2. File uploads are parsed and validated
+3. Data sent to `/api/verify` or `/api/verify-text` endpoint
+4. Backend parses and validates supplier data
+5. For each supplier, backend scrapes USDA OID page using OID number
+6. Certification data extracted and compared against requested ingredients
+7. Operation name populated from USDA scraping results (not user input)
+8. Results aggregated and returned with matching/missing ingredient lists
+9. Frontend displays summary statistics and detailed table of results
 
 ### External Dependencies
 
@@ -115,6 +123,19 @@ Preferred communication style: Simple, everyday language.
 - Uses substring matching for ingredient comparison
 - Rationale: Accounts for variations in product naming conventions
 - Normalizes all text (lowercase, punctuation removal) before comparison
+
+**Side-by-Side Input Layout**:
+- Split-screen design: Manual table entry (~65% width) on left, file upload (~35% width) on right
+- Vertical "OR" divider separates the two input methods
+- Rationale: Provides clear visual separation while maintaining easy access to both input methods
+- Responsive: Stacks vertically on mobile devices (<1024px)
+
+**Dynamic Table Input**:
+- Two-column table with NOP ID# (10-digit numeric) and Ingredients (comma-separated)
+- Add/Remove row functionality for batch entry
+- Input validation: NOP ID limited to digits only, max 10 characters
+- Rationale: Streamlined manual entry for users with small datasets
+- Operation names automatically populated from USDA scraping (not manual input)
 
 ## Deployment
 
