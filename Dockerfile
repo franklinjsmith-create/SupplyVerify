@@ -29,8 +29,8 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install all dependencies first (needed to run playwright install-deps)
-RUN npm ci --omit=dev
+# Install all dependencies (Vite is needed at runtime to serve frontend)
+RUN npm ci
 
 # Install Playwright system dependencies and Chromium browser
 RUN npx playwright install-deps chromium && \
