@@ -67,7 +67,7 @@ Preferred communication style: Simple, everyday language.
 ### External Dependencies
 
 **USDA Organic Integrity Database**: 
-- External data source accessed via web scraping at `https://organic.ams.usda.gov/integrity/CP/OPP?cid=62&nopid={nopid}`
+- External data source accessed via web scraping at `https://organic.ams.usda.gov/Integrity/CP/OPP?nopid={nopid}`
 - No official API available; uses Blazor (client-side JavaScript framework) requiring headless browser
 - Playwright with Chromium handles JavaScript execution and DOM rendering
 - Rate limiting through concurrent batch processing (max 3 simultaneous requests)

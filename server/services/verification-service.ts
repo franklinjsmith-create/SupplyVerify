@@ -54,7 +54,7 @@ export async function verifySupplier(
       certification_status: certificationStatus,
       matching_ingredients: matchingIngredients,
       missing_ingredients: missingIngredients,
-      source_url: `https://organic.ams.usda.gov/integrity/CP/OPP?cid=62&nopid=${supplier.oid_number}`,
+      source_url: `https://organic.ams.usda.gov/Integrity/CP/OPP?nopid=${supplier.oid_number}`,
       scopes: certificationData.scopes,
     };
   } catch (error) {
@@ -69,7 +69,7 @@ export async function verifySupplier(
       certification_status: "Failed",
       matching_ingredients: [],
       missing_ingredients: supplier.ingredients,
-      source_url: `https://organic.ams.usda.gov/integrity/CP/OPP?cid=62&nopid=${supplier.oid_number}`,
+      source_url: `https://organic.ams.usda.gov/Integrity/CP/OPP?nopid=${supplier.oid_number}`,
     };
   }
 }

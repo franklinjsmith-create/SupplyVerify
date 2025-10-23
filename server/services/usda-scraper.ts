@@ -17,7 +17,7 @@ function normalizeProductName(name: string): string {
 }
 
 export async function scrapeUSDAPage(oidNumber: string): Promise<CertificationData> {
-  const url = `https://organic.ams.usda.gov/integrity/CP/OPP?cid=62&nopid=${oidNumber}`;
+  const url = `https://organic.ams.usda.gov/Integrity/CP/OPP?nopid=${oidNumber}`;
   
   let browser;
   try {
