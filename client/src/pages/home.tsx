@@ -4,8 +4,8 @@ import { Download, FileUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { FileUploadZone } from "@/components/file-upload-zone";
-import { TextInputZone } from "@/components/text-input-zone";
+import { CompactFileUpload } from "@/components/compact-file-upload";
+import { TableInput } from "@/components/table-input";
 import { ResultsSummary } from "@/components/results-summary";
 import { ResultsTable } from "@/components/results-table";
 import { LoadingState } from "@/components/loading-state";
@@ -90,6 +90,7 @@ export default function Home() {
     onSuccess: (data) => {
       setResults(null);
       setSessionId(data.sessionId);
+      setSelectedFile(null);
       setProgress({
         total: data.total,
         completed: 0,
@@ -134,29 +135,21 @@ export default function Home() {
 
   const handleFileSelect = (file: File) => {
     setSelectedFile(file);
+    const formData = new FormData();
+    formData.append("file", file);
+    verifyMutation.mutate(formData);
     toast({
-      title: "File selected",
-      description: `${file.name} is ready to upload`,
+      title: "File uploaded",
+      description: `Processing ${file.name}...`,
     });
   };
 
-  const handleVerify = () => {
-    if (!selectedFile) {
-      toast({
-        title: "No file selected",
-        description: "Please select a file to verify",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("file", selectedFile);
-    verifyMutation.mutate(formData);
-  };
-
-  const handleTextSubmit = (text: string) => {
-    verifyTextMutation.mutate(text);
+  const handleTableSubmit = (data: Array<{ nopId: string; ingredients: string }>) => {
+    // Convert table data to pipe-delimited format that backend expects
+    const textData = data
+      .map((row) => `Supplier | ${row.nopId} | ${row.ingredients}`)
+      .join("\n");
+    verifyTextMutation.mutate(textData);
   };
 
   const handleDownloadJSON = () => {
@@ -204,47 +197,41 @@ export default function Home() {
               Integrity Database
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <FileUploadZone
-              onFileSelect={handleFileSelect}
-              disabled={isLoading}
-            />
+          <CardContent>
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_0.5fr] gap-6 items-start">
+              {/* Left: Table Input */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold text-foreground">Manual Entry</h3>
+                <TableInput onSubmit={handleTableSubmit} disabled={isLoading} />
+              </div>
 
-            {selectedFile && (
-              <div className="flex items-center justify-between p-4 rounded-md bg-muted">
-                <div className="flex items-center gap-2">
-                  <FileUp className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-medium" data-testid="text-selected-file">
-                    {selectedFile.name}
+              {/* Middle: OR Divider */}
+              <div className="hidden lg:flex flex-col items-center justify-center py-8">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="h-full w-px bg-border min-h-[100px]" />
+                  <span className="px-3 py-1.5 text-xs font-medium text-muted-foreground bg-muted rounded-full">
+                    OR
                   </span>
-                  <span className="text-xs text-muted-foreground">
-                    ({(selectedFile.size / 1024).toFixed(2)} KB)
-                  </span>
+                  <div className="h-full w-px bg-border min-h-[100px]" />
                 </div>
-                <Button
-                  onClick={handleVerify}
-                  disabled={isLoading}
-                  size="lg"
-                  data-testid="button-verify"
-                >
-                  {isLoading ? "Verifying..." : "Verify Suppliers"}
-                </Button>
               </div>
-            )}
 
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border" />
+              {/* Mobile: OR Divider */}
+              <div className="lg:hidden relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t border-border" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-card px-2 text-muted-foreground">Or</span>
+                </div>
               </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">Or</span>
+
+              {/* Right: File Upload */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold text-foreground">Upload File</h3>
+                <CompactFileUpload onFileSelect={handleFileSelect} disabled={isLoading} />
               </div>
             </div>
-
-            <TextInputZone
-              onTextSubmit={handleTextSubmit}
-              disabled={isLoading}
-            />
           </CardContent>
         </Card>
 
