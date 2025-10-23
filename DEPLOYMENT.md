@@ -2,6 +2,10 @@
 
 This application uses Playwright to scrape the USDA Organic Integrity Database, which requires browser binaries to be installed. Follow these platform-specific instructions to deploy successfully.
 
+## Important: Docker-Based Deployment
+
+This project includes a **Dockerfile** that handles all system dependencies automatically. Railway, Render, and other platforms will auto-detect the Dockerfile and use it for deployment - no manual configuration needed!
+
 ## Prerequisites
 
 The application requires:
@@ -13,30 +17,32 @@ The application requires:
 
 ### Railway (Recommended)
 
-Railway is the easiest deployment option with excellent Playwright support.
+Railway is the easiest deployment option with excellent Playwright support. Railway will automatically detect and use the Dockerfile.
 
 1. **Connect your repository**
    - Go to [railway.app](https://railway.app)
    - Create new project → "Deploy from GitHub repo"
    - Select this repository
 
-2. **Configure build settings**
-   - Build Command: `npm install && bash install-browsers.sh && npm run build`
-   - Start Command: `npm start`
-   - No environment variables needed for basic functionality
-
-3. **Deploy**
-   - Railway will automatically build and deploy
-   - First deploy takes 3-5 minutes (installs Chromium)
+2. **Deploy**
+   - Railway automatically detects the Dockerfile
+   - No build commands needed - Dockerfile handles everything
+   - First deploy takes 5-8 minutes (installs system dependencies + Chromium)
    - Your app will be live at `your-app.up.railway.app`
 
+3. **Verify deployment**
+   - Check build logs to see "Installing Chromium system dependencies"
+   - App should start without errors
+
 **Estimated Cost:** $5/month (Hobby plan)
+
+**Note:** If you need to override build settings, Railway should leave them empty - the Dockerfile handles everything.
 
 ---
 
 ### Render
 
-Render provides great support for Node.js and Playwright.
+Render provides great support for Docker deployments and automatically detects the Dockerfile.
 
 1. **Create new Web Service**
    - Go to [render.com](https://render.com)
@@ -45,14 +51,13 @@ Render provides great support for Node.js and Playwright.
 
 2. **Configure settings**
    - Name: `usda-verification-tool`
-   - Environment: `Node`
-   - Build Command: `npm install && bash install-browsers.sh && npm run build`
-   - Start Command: `npm start`
+   - Environment: `Docker`
+   - Render will auto-detect the Dockerfile
    - Instance Type: Starter ($7/month) or Free (for testing)
 
 3. **Deploy**
    - Click "Create Web Service"
-   - First build takes 5-8 minutes
+   - First build takes 5-8 minutes (Docker image build + dependencies)
    - App will be at `usda-verification-tool.onrender.com`
 
 **Estimated Cost:** Free tier available, $7/month for production
@@ -163,19 +168,19 @@ The first request after deployment may take 20-30 seconds as Chromium initialize
 
 **Cause:** System dependencies weren't installed during build
 
-**Solution:** 
-1. Check your build logs - ensure you see "Installing system dependencies for Chromium..."
-2. Verify build command includes: `npm install && bash install-browsers.sh && npm run build`
-3. If Railway: Make sure the build uses a Linux environment (should be automatic)
-4. Redeploy with updated `install-browsers.sh` that includes `playwright install-deps chromium`
+**Solution (Recommended - Docker):**
+The Dockerfile in this repository automatically installs all required system libraries. Railway and Render will auto-detect it.
 
-**Railway-specific fix:**
-- The updated `install-browsers.sh` now runs `npx playwright install-deps chromium` BEFORE installing the browser
-- This installs all required Linux libraries (glib, nss, X11, etc.)
-- First build after this fix may take 5-7 minutes
+1. **Ensure Dockerfile is in your repository** - Check that `Dockerfile` exists in the root
+2. **Push to GitHub** - The Dockerfile should be committed
+3. **Redeploy** - Platform will detect Dockerfile and rebuild
+4. **Check build logs** - Should see "Installing Chromium system dependencies"
+5. **First build takes 5-8 minutes** - Docker installs all required libraries
+
+If you still have issues, make sure Railway/Render isn't using custom build commands - leave them empty to let the Dockerfile work.
 
 ### "Browser executable not found"
-**Solution:** Ensure `install-browsers.sh` ran during build phase. Check build logs for "Installing Playwright Chromium browser..."
+**Solution:** The Dockerfile automatically installs Playwright Chromium. If you still see this error, check build logs to ensure the Dockerfile build completed successfully.
 
 ### Timeout errors
 **Solution:** Increase server timeout or reduce concurrent limit in `server/services/verification-service.ts` (line 125: change `CONCURRENT_LIMIT` from 3 to 2)
@@ -220,6 +225,7 @@ npm run dev
 
 If you encounter issues:
 1. Check deployment platform logs
-2. Verify build command includes `install-browsers.sh`
+2. Verify Dockerfile is in your repository and being used (check build logs)
 3. Ensure instance has sufficient memory (512MB+)
 4. Test with known good NOP ID: 8150001085 (Mountain Rose Herbs)
+5. Make sure platform isn't using custom build commands - let Dockerfile handle everything
