@@ -4,6 +4,8 @@ import type { Scope } from "@shared/schema";
 export interface CertificationData {
   operation_name: string;
   certifier: string;
+  effective_date: string;
+  all_certified_products: string[];
   scopes: Scope[];
 }
 
@@ -170,9 +172,37 @@ export async function scrapeUSDAPage(oidNumber: string): Promise<CertificationDa
       throw new Error(`No certification data found for NOP ID ${oidNumber}. The page may be empty or the NOP ID may be invalid.`);
     }
     
+    // Collect all certified products from all scopes
+    const allCertifiedProducts: string[] = [];
+    scopes.forEach(scope => {
+      scope.certified_products.forEach(product => {
+        if (!allCertifiedProducts.includes(product)) {
+          allCertifiedProducts.push(product);
+        }
+      });
+    });
+    
+    // Find the earliest effective date across all scopes
+    let earliestDate = "Not found";
+    const validDates = scopes
+      .map(s => s.effective_date)
+      .filter(d => d !== "Not found" && d !== "N/A");
+    
+    if (validDates.length > 0) {
+      // Sort dates and take the earliest one
+      const sortedDates = validDates.sort((a, b) => {
+        const dateA = new Date(a);
+        const dateB = new Date(b);
+        return dateA.getTime() - dateB.getTime();
+      });
+      earliestDate = sortedDates[0];
+    }
+    
     return {
       operation_name: operationName,
       certifier,
+      effective_date: earliestDate,
+      all_certified_products: allCertifiedProducts,
       scopes,
     };
   } catch (error) {

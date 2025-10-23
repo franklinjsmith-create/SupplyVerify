@@ -18,6 +18,8 @@ export const verificationResultSchema = z.object({
   nop_id: z.string(),
   certifier: z.string(),
   certification_status: z.string(),
+  effective_date: z.string(),
+  all_certified_products: z.array(z.string()),
   matching_products: z.array(z.string()),
   missing_products: z.array(z.string()),
   source_url: z.string(),

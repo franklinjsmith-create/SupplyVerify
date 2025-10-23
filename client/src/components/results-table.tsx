@@ -1,4 +1,5 @@
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, ChevronDown, ChevronRight } from "lucide-react";
+import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -16,7 +17,32 @@ interface ResultsTableProps {
   results: VerificationResult[];
 }
 
+interface ExpandedRows {
+  [key: number]: boolean;
+}
+
 export function ResultsTable({ results }: ResultsTableProps) {
+  const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
+
+  const toggleRow = (index: number) => {
+    setExpandedRows(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
+  };
+
+  const normalizeProduct = (product: string): string => {
+    return product.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, " ").trim();
+  };
+
+  const isProductMatch = (certifiedProduct: string, matchingProducts: string[]): boolean => {
+    const normalized = normalizeProduct(certifiedProduct);
+    return matchingProducts.some(mp => {
+      const normalizedMatch = normalizeProduct(mp);
+      return normalized.includes(normalizedMatch) || normalizedMatch.includes(normalized);
+    });
+  };
+
   return (
     <div className="rounded-md border border-border bg-card">
       <ScrollArea className="w-full">
@@ -27,8 +53,10 @@ export function ResultsTable({ results }: ResultsTableProps) {
               <TableHead className="min-w-[120px] font-mono">NOP ID</TableHead>
               <TableHead className="min-w-[180px]">Certifier</TableHead>
               <TableHead className="min-w-[120px]">Status</TableHead>
+              <TableHead className="min-w-[130px]">Effective Date</TableHead>
               <TableHead className="min-w-[200px]">Matching Products</TableHead>
               <TableHead className="min-w-[200px]">Missing Products</TableHead>
+              <TableHead className="min-w-[250px]">All Certified Products</TableHead>
               <TableHead className="min-w-[100px]">Source</TableHead>
             </TableRow>
           </TableHeader>
@@ -61,6 +89,13 @@ export function ResultsTable({ results }: ResultsTableProps) {
                 <TableCell>
                   <StatusBadge status={result.certification_status} />
                 </TableCell>
+                <TableCell data-testid={`text-effective-date-${index}`}>
+                  {result.effective_date !== "Not found" ? (
+                    <span className="text-sm">{result.effective_date}</span>
+                  ) : (
+                    <span className="text-sm text-muted-foreground">Not found</span>
+                  )}
+                </TableCell>
                 <TableCell>
                   {result.matching_products.length > 0 ? (
                     <ScrollArea className="max-h-32">
@@ -87,6 +122,47 @@ export function ResultsTable({ results }: ResultsTableProps) {
                         ))}
                       </ul>
                     </ScrollArea>
+                  ) : (
+                    <span className="text-sm text-muted-foreground">None</span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {result.all_certified_products.length > 0 ? (
+                    <div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleRow(index)}
+                        className="gap-1.5 p-2"
+                        data-testid={`button-expand-products-${index}`}
+                      >
+                        {expandedRows[index] ? (
+                          <ChevronDown className="h-4 w-4" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4" />
+                        )}
+                        <span className="text-xs">
+                          {result.all_certified_products.length} product{result.all_certified_products.length !== 1 ? 's' : ''}
+                        </span>
+                      </Button>
+                      {expandedRows[index] && (
+                        <ScrollArea className="max-h-64 mt-2">
+                          <ul className="text-sm space-y-1 pl-2" data-testid={`list-all-products-${index}`}>
+                            {result.all_certified_products.map((product, i) => {
+                              const isMatch = isProductMatch(product, result.matching_products);
+                              return (
+                                <li
+                                  key={i}
+                                  className={isMatch ? "text-[hsl(var(--status-certified))] font-medium" : ""}
+                                >
+                                  • {product}
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </ScrollArea>
+                      )}
+                    </div>
                   ) : (
                     <span className="text-sm text-muted-foreground">None</span>
                   )}
