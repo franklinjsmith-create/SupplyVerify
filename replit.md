@@ -41,9 +41,10 @@ Preferred communication style: Simple, everyday language.
 - XLSX library for Excel file parsing
 
 **Web Scraping**: 
-- Axios for HTTP requests to USDA OID website
-- Cheerio for HTML parsing and data extraction
+- Playwright for JavaScript-rendered content (USDA uses Blazor framework)
+- Chromium headless browser with containerization flags (--no-sandbox, --disable-setuid-sandbox)
 - Custom scraper service that normalizes product names and extracts certification scopes
+- networkidle wait strategy ensures full page render before data extraction
 
 **Validation**: Zod schemas for runtime type validation of inputs and outputs
 
@@ -66,10 +67,12 @@ Preferred communication style: Simple, everyday language.
 ### External Dependencies
 
 **USDA Organic Integrity Database**: 
-- External data source accessed via web scraping at `https://organic.ams.usda.gov/Integrity/Operations/Details`
-- No official API available; relies on HTML structure stability
-- Rate limiting handled through timeout configuration (30s per request)
-- Fallback handling for 404s and server errors
+- External data source accessed via web scraping at `https://organic.ams.usda.gov/integrity/CP/OPP?cid=62&nopid={nopid}`
+- No official API available; uses Blazor (client-side JavaScript framework) requiring headless browser
+- Playwright with Chromium handles JavaScript execution and DOM rendering
+- Rate limiting through concurrent batch processing (max 3 simultaneous requests)
+- Timeout configuration: 30s page load, 10s for content selector
+- Fallback handling for 404s, timeouts, and server errors
 
 **Third-Party Services**:
 - Google Fonts (Inter, Roboto Mono) for typography
@@ -112,3 +115,28 @@ Preferred communication style: Simple, everyday language.
 - Uses substring matching for ingredient comparison
 - Rationale: Accounts for variations in product naming conventions
 - Normalizes all text (lowercase, punctuation removal) before comparison
+
+## Deployment
+
+This application requires Playwright browser binaries to function in production. See **DEPLOYMENT.md** for comprehensive deployment instructions.
+
+**Quick Start:**
+1. Deploy to Railway, Render, or Fly.io (recommended platforms)
+2. Set build command: `npm install && bash install-browsers.sh && npm run build`
+3. Set start command: `npm start`
+4. No environment variables required
+
+**Performance in Production:**
+- Single supplier: 5-15 seconds
+- 10 suppliers: 30-50 seconds (concurrent processing)
+- 100 suppliers: 5-8 minutes
+
+**Requirements:**
+- Node.js 18+
+- 512MB+ RAM recommended
+- Chromium browser (auto-installed via install-browsers.sh)
+
+**Known Limitations:**
+- Cannot run in Replit development environment (Playwright binaries not supported)
+- Requires deployment to cloud platform with headless browser support
+- First request after deployment may take 20-30 seconds (Chromium initialization)
