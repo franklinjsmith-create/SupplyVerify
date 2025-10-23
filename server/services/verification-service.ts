@@ -15,30 +15,33 @@ export async function verifyOperation(
   try {
     const certificationData = await scrapeUSDAPage(operation.nop_id);
 
-    const allCertifiedProducts = certificationData.scopes.flatMap(
-      (scope) => scope.certified_products
-    );
+    let matchingProducts: string[] = [];
+    let missingProducts: string[] = [];
 
-    const normalizedUserProducts = operation.products.map(normalizeProduct);
-    const normalizedCertifiedProducts = allCertifiedProducts.map(normalizeProduct);
+    // Only verify products if they were provided
+    if (operation.products && operation.products.length > 0) {
+      const allCertifiedProducts = certificationData.scopes.flatMap(
+        (scope) => scope.certified_products
+      );
 
-    const matchingProducts: string[] = [];
-    const missingProducts: string[] = [];
+      const normalizedUserProducts = operation.products.map(normalizeProduct);
+      const normalizedCertifiedProducts = allCertifiedProducts.map(normalizeProduct);
 
-    normalizedUserProducts.forEach((userProduct, index) => {
-      const isMatch = normalizedCertifiedProducts.some((certifiedProduct) => {
-        return (
-          certifiedProduct.includes(userProduct) ||
-          userProduct.includes(certifiedProduct)
-        );
+      normalizedUserProducts.forEach((userProduct, index) => {
+        const isMatch = normalizedCertifiedProducts.some((certifiedProduct) => {
+          return (
+            certifiedProduct.includes(userProduct) ||
+            userProduct.includes(certifiedProduct)
+          );
+        });
+
+        if (isMatch) {
+          matchingProducts.push(operation.products[index]);
+        } else {
+          missingProducts.push(operation.products[index]);
+        }
       });
-
-      if (isMatch) {
-        matchingProducts.push(operation.products[index]);
-      } else {
-        missingProducts.push(operation.products[index]);
-      }
-    });
+    }
 
     const hasCertifiedScope = certificationData.scopes.some(
       (scope) => scope.status.toLowerCase().includes("certified")
@@ -66,7 +69,7 @@ export async function verifyOperation(
       certifier: "Error",
       certification_status: "Failed",
       matching_products: [],
-      missing_products: operation.products,
+      missing_products: operation.products || [],
       source_url: `https://organic.ams.usda.gov/Integrity/CP/OPP?nopid=${operation.nop_id}`,
     };
   }

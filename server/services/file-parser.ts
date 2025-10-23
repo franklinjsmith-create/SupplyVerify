@@ -32,22 +32,19 @@ export function parseCSV(fileContent: string): ParsedOperationData {
       const nopId = row.nop_id || row.nopid || row.oid_number || row.oid || row.oid_num || "";
       const productsRaw = row.products || row.product || row.ingredients || row.ingredient || "";
 
-      if (!operationName || !nopId || !productsRaw) {
+      if (!operationName || !nopId) {
         errors.push(
-          `Row ${index + 1}: Missing required fields (Operation Name, NOP ID, or Products)`
+          `Row ${index + 1}: Missing required fields (Operation Name or NOP ID)`
         );
         return;
       }
 
       const products = productsRaw
-        .split(",")
-        .map((prod: string) => prod.trim())
-        .filter((prod: string) => prod.length > 0);
-
-      if (products.length === 0) {
-        errors.push(`Row ${index + 1}: No valid products found`);
-        return;
-      }
+        ? productsRaw
+            .split(",")
+            .map((prod: string) => prod.trim())
+            .filter((prod: string) => prod.length > 0)
+        : [];
 
       const operation = {
         operation_name: operationName.trim(),
@@ -101,22 +98,19 @@ export function parseXLSX(fileBuffer: Buffer): ParsedOperationData {
         const nopId = normalizedRow.nop_id || normalizedRow.nopid || normalizedRow.oid_number || normalizedRow.oid || normalizedRow.oid_num || "";
         const productsRaw = normalizedRow.products || normalizedRow.product || normalizedRow.ingredients || normalizedRow.ingredient || "";
 
-        if (!operationName || !nopId || !productsRaw) {
+        if (!operationName || !nopId) {
           errors.push(
-            `Row ${index + 2}: Missing required fields (Operation Name, NOP ID, or Products)`
+            `Row ${index + 2}: Missing required fields (Operation Name or NOP ID)`
           );
           return;
         }
 
-        const products = String(productsRaw)
-          .split(",")
-          .map((prod: string) => prod.trim())
-          .filter((prod: string) => prod.length > 0);
-
-        if (products.length === 0) {
-          errors.push(`Row ${index + 2}: No valid products found`);
-          return;
-        }
+        const products = productsRaw
+          ? String(productsRaw)
+              .split(",")
+              .map((prod: string) => prod.trim())
+              .filter((prod: string) => prod.length > 0)
+          : [];
 
         const operation = {
           operation_name: String(operationName).trim(),
@@ -153,29 +147,26 @@ export function parseTextInput(text: string): ParsedOperationData {
     try {
       const parts = line.split("|").map((part) => part.trim());
 
-      if (parts.length < 3) {
+      if (parts.length < 2) {
         errors.push(
-          `Line ${index + 1}: Invalid format. Expected: Operation Name | NOP ID | Products`
+          `Line ${index + 1}: Invalid format. Expected: Operation Name | NOP ID | Products (optional)`
         );
         return;
       }
 
-      const [operationName, nopId, productsRaw] = parts;
+      const [operationName, nopId, productsRaw = ""] = parts;
 
-      if (!operationName || !nopId || !productsRaw) {
-        errors.push(`Line ${index + 1}: Missing required fields`);
+      if (!operationName || !nopId) {
+        errors.push(`Line ${index + 1}: Missing required fields (Operation Name or NOP ID)`);
         return;
       }
 
       const products = productsRaw
-        .split(",")
-        .map((prod) => prod.trim())
-        .filter((prod) => prod.length > 0);
-
-      if (products.length === 0) {
-        errors.push(`Line ${index + 1}: No valid products found`);
-        return;
-      }
+        ? productsRaw
+            .split(",")
+            .map((prod) => prod.trim())
+            .filter((prod) => prod.length > 0)
+        : [];
 
       const operation = {
         operation_name: operationName,

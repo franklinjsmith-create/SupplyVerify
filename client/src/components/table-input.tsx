@@ -53,7 +53,7 @@ export function TableInput({ onSubmit, disabled }: TableInputProps) {
 
   const handleSubmit = () => {
     const validRows = rows.filter(
-      (row) => row.nopId.trim() && row.products.trim()
+      (row) => row.nopId.trim()
     );
     if (validRows.length > 0) {
       onSubmit(validRows);
@@ -61,7 +61,7 @@ export function TableInput({ onSubmit, disabled }: TableInputProps) {
   };
 
   const hasValidData = rows.some(
-    (row) => row.nopId.trim() && row.products.trim()
+    (row) => row.nopId.trim()
   );
 
   return (
