@@ -88,6 +88,7 @@ export default function Home() {
       return await response.json() as { sessionId: string; total: number };
     },
     onSuccess: (data) => {
+      setResults(null);
       setSessionId(data.sessionId);
       setProgress({
         total: data.total,
@@ -112,6 +113,7 @@ export default function Home() {
       return await response.json() as { sessionId: string; total: number };
     },
     onSuccess: (data) => {
+      setResults(null);
       setSessionId(data.sessionId);
       setProgress({
         total: data.total,
