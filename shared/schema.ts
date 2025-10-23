@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const operationInputSchema = z.object({
-  operation_name: z.string().min(1, "Operation name is required"),
+  operation_name: z.string().default(""),
   nop_id: z.string().min(1, "NOP ID is required"),
   products: z.array(z.string()).default([]),
 });
