@@ -1,5 +1,4 @@
-import axios from "axios";
-import * as cheerio from "cheerio";
+import { chromium } from "playwright";
 import type { Scope } from "@shared/schema";
 
 export interface CertificationData {
@@ -18,98 +17,130 @@ function normalizeProductName(name: string): string {
 }
 
 export async function scrapeUSDAPage(oidNumber: string): Promise<CertificationData> {
-  const url = `https://organic.ams.usda.gov/Integrity/Operations/Details?operationId=${oidNumber}`;
-
+  const url = `https://organic.ams.usda.gov/integrity/CP/OPP?cid=62&nopid=${oidNumber}`;
+  
+  let browser;
   try {
-    const response = await axios.get(url, {
-      timeout: 30000,
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-      },
-      validateStatus: (status) => status < 500,
+    browser = await chromium.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
-
-    if (response.status === 404) {
-      throw new Error(`OID ${oidNumber} not found in USDA database`);
-    }
-
-    if (response.status !== 200) {
-      throw new Error(`USDA server returned status ${response.status} for OID ${oidNumber}`);
-    }
-
-    const $ = cheerio.load(response.data);
-
-    const operationName =
-      $('h1:contains("Operation Name")').next().text().trim() ||
-      $('label:contains("Operation Name")').next().text().trim() ||
-      $('dt:contains("Operation Name")').next().text().trim() ||
-      $('div:contains("Operation Name")').first().text().replace("Operation Name", "").trim() ||
-      "Not found";
-
-    const certifier =
-      $('h3:contains("Certifier")').next().text().trim() ||
-      $('label:contains("Certifier")').next().text().trim() ||
-      $('dt:contains("Certifier")').next().text().trim() ||
-      $('strong:contains("Certifier")').parent().text().replace("Certifier", "").trim() ||
-      "Not found";
-
-    const scopes: Scope[] = [];
-
-    const scopeNames = ["CROPS", "HANDLING", "LIVESTOCK", "WILD CROPS"];
-
-    scopeNames.forEach((scopeName) => {
-      const scopeSection = $(`h3:contains("${scopeName}"), h4:contains("${scopeName}")`).first();
-
-      if (scopeSection.length > 0) {
-        const container = scopeSection.parent();
-
-        const statusText =
-          container.find('span:contains("Status")').text() ||
-          container.find('label:contains("Status")').next().text() ||
-          container.find('dt:contains("Status")').next().text() ||
-          "Not found";
-
-        const status = statusText.includes("Certified") ? "Certified" : "Not found";
-
-        const dateText =
-          container.find('span:contains("Effective Date")').text() ||
-          container.find('label:contains("Effective Date")').next().text() ||
-          container.find('dt:contains("Effective Date")').next().text() ||
-          "Not found";
-
-        const effectiveDate = dateText.replace("Effective Date:", "").trim() || "Not found";
-
-        const certifiedProducts: string[] = [];
+    
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    
+    // Navigate to the page
+    await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
+    
+    // Wait for the content to be rendered (wait for operation name to appear)
+    await page.waitForSelector('text=Operation Name', { timeout: 10000 });
+    
+    // Extract operation name
+    const operationName = await page.evaluate(() => {
+      const labels = Array.from(document.querySelectorAll('strong, td, label'));
+      for (const label of labels) {
+        if (label.textContent?.includes('Operation Name')) {
+          const parent = label.parentElement;
+          const nextSibling = parent?.nextElementSibling;
+          if (nextSibling) {
+            return nextSibling.textContent?.trim() || "Not found";
+          }
+          const text = parent?.textContent || "";
+          return text.replace("Operation Name:", "").trim() || "Not found";
+        }
+      }
+      return "Not found";
+    });
+    
+    // Extract certifier
+    const certifier = await page.evaluate(() => {
+      const labels = Array.from(document.querySelectorAll('strong, td, label'));
+      for (const label of labels) {
+        if (label.textContent?.includes('Certifier:')) {
+          const parent = label.parentElement;
+          const nextSibling = parent?.nextElementSibling;
+          if (nextSibling) {
+            return nextSibling.textContent?.trim() || "Not found";
+          }
+          const text = parent?.textContent || "";
+          return text.replace("Certifier:", "").trim() || "Not found";
+        }
+      }
+      return "Not found";
+    });
+    
+    // Extract scopes from table
+    const scopesData = await page.evaluate(() => {
+      const scopes: Array<{
+        scope_name: string;
+        status: string;
+        effective_date: string;
+        certified_products: string;
+      }> = [];
+      
+      const scopeNames = ["CROPS", "HANDLING", "LIVESTOCK", "WILD CROPS"];
+      const rows = Array.from(document.querySelectorAll('table tr'));
+      
+      rows.forEach(row => {
+        const cells = Array.from(row.querySelectorAll('td'));
         
-        container.find("ul li, table td").each((_, element) => {
-          const text = $(element).text().trim();
-          if (text && text.length > 2 && !text.includes("Status") && !text.includes("Effective")) {
-            const normalized = normalizeProductName(text);
+        if (cells.length >= 4) {
+          const scopeCell = cells[1]?.textContent?.trim() || "";
+          
+          if (scopeNames.includes(scopeCell)) {
+            const status = cells[2]?.textContent?.trim() || "Not found";
+            const effectiveDate = cells[3]?.textContent?.trim() || "Not found";
+            const productsText = cells[4]?.textContent?.trim() || "";
+            
+            scopes.push({
+              scope_name: scopeCell,
+              status: status === "--" || status === "N/A" ? "Not certified" : status,
+              effective_date: effectiveDate === "N/A" ? "Not found" : effectiveDate,
+              certified_products: productsText,
+            });
+          }
+        }
+      });
+      
+      return scopes;
+    });
+    
+    await browser.close();
+    
+    // Process the scopes
+    const scopes: Scope[] = [];
+    const scopeNames = ["CROPS", "HANDLING", "LIVESTOCK", "WILD CROPS"];
+    
+    scopesData.forEach(scopeData => {
+      const certifiedProducts: string[] = [];
+      
+      if (scopeData.certified_products && scopeData.certified_products !== "--") {
+        // Split by commas, but not within parentheses
+        const productList = scopeData.certified_products
+          .split(/,(?![^()]*\))/)
+          .map(p => p.trim());
+        
+        productList.forEach(product => {
+          if (product && product.length > 2) {
+            const normalized = normalizeProductName(product);
             if (normalized && !certifiedProducts.includes(normalized)) {
               certifiedProducts.push(normalized);
             }
           }
         });
-
-        container.find("p").each((_, element) => {
-          const text = $(element).text().trim();
-          if (text && !text.includes("Status") && !text.includes("Effective")) {
-            const items = text.split(/[,;]/).map((item) => normalizeProductName(item));
-            items.forEach((item) => {
-              if (item && item.length > 2 && !certifiedProducts.includes(item)) {
-                certifiedProducts.push(item);
-              }
-            });
-          }
-        });
-
-        scopes.push({
-          scope_name: scopeName,
-          status,
-          effective_date: effectiveDate,
-          certified_products: certifiedProducts,
-        });
-      } else {
+      }
+      
+      scopes.push({
+        scope_name: scopeData.scope_name,
+        status: scopeData.status,
+        effective_date: scopeData.effective_date,
+        certified_products: certifiedProducts,
+      });
+    });
+    
+    // Add any missing scopes
+    scopeNames.forEach(scopeName => {
+      if (!scopes.find(s => s.scope_name === scopeName)) {
         scopes.push({
           scope_name: scopeName,
           status: "Not found",
@@ -118,22 +149,26 @@ export async function scrapeUSDAPage(oidNumber: string): Promise<CertificationDa
         });
       }
     });
-
+    
     if (operationName === "Not found" && certifier === "Not found") {
-      throw new Error(`No certification data found for OID ${oidNumber}. The page may be empty or the OID may be invalid.`);
+      throw new Error(`No certification data found for NOP ID ${oidNumber}. The page may be empty or the NOP ID may be invalid.`);
     }
-
+    
     return {
       operation_name: operationName,
       certifier,
       scopes,
     };
   } catch (error) {
-    if (error instanceof Error) {
-      console.error(`Error scraping OID ${oidNumber}:`, error.message);
-      throw new Error(`Failed to fetch USDA data for OID ${oidNumber}: ${error.message}`);
+    if (browser) {
+      await browser.close();
     }
     
-    throw new Error(`Failed to fetch USDA data for OID ${oidNumber}: Unknown error`);
+    if (error instanceof Error) {
+      console.error(`Error scraping NOP ID ${oidNumber}:`, error.message);
+      throw new Error(`Failed to fetch USDA data for NOP ID ${oidNumber}: ${error.message}`);
+    }
+    
+    throw new Error(`Failed to fetch USDA data for NOP ID ${oidNumber}: Unknown error`);
   }
 }
