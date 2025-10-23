@@ -147,20 +147,21 @@ export function ResultsTable({ results }: ResultsTableProps) {
                         </span>
                       </Button>
                       {expandedRows[index] && (
-                        <ScrollArea className="max-h-64 mt-2">
-                          <ul className="text-sm space-y-1 pl-2" data-testid={`list-all-products-${index}`}>
+                        <ScrollArea className="max-h-96 mt-2">
+                          <ul className="text-sm space-y-1.5 pl-2 pr-4" data-testid={`list-all-products-${index}`}>
                             {result.all_certified_products.map((product, i) => {
                               const isMatch = isProductMatch(product, result.matching_products);
                               return (
                                 <li
                                   key={i}
-                                  className={isMatch ? "text-[hsl(var(--status-certified))] font-medium" : ""}
+                                  className={`break-words ${isMatch ? "text-[hsl(var(--status-certified))] font-medium" : ""}`}
                                 >
                                   • {product}
                                 </li>
                               );
                             })}
                           </ul>
+                          <ScrollBar orientation="vertical" />
                         </ScrollArea>
                       )}
                     </div>

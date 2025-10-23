@@ -133,10 +133,23 @@ export async function scrapeUSDAPage(oidNumber: string): Promise<CertificationDa
       const certifiedProducts: string[] = [];
       
       if (scopeData.certified_products && scopeData.certified_products !== "--") {
-        // Split by commas, but not within parentheses
-        const productList = scopeData.certified_products
-          .split(/,(?![^()]*\))/)
-          .map(p => p.trim());
+        // Split by commas, semicolons, newlines, or multiple spaces
+        // But not within parentheses for comma case
+        let productList: string[] = [];
+        
+        // First try splitting by commas (but not within parentheses)
+        const commaSplit = scopeData.certified_products.split(/,(?![^()]*\))/);
+        
+        // If we only got one item, try other delimiters
+        if (commaSplit.length === 1) {
+          // Try splitting by semicolons, newlines, tabs, or 3+ spaces
+          productList = scopeData.certified_products
+            .split(/[;\n\r\t]|(?:\s{3,})/)
+            .map(p => p.trim())
+            .filter(p => p.length > 0);
+        } else {
+          productList = commaSplit.map(p => p.trim());
+        }
         
         productList.forEach(product => {
           if (product && product.length > 2) {
