@@ -35,39 +35,46 @@ export async function scrapeUSDAPage(oidNumber: string): Promise<CertificationDa
     // Wait for the content to be rendered (wait for operation name to appear)
     await page.waitForSelector('text=Operation Name', { timeout: 10000 });
     
-    // Extract operation name
-    const operationName = await page.evaluate(() => {
-      const labels = Array.from(document.querySelectorAll('strong, td, label'));
-      for (const label of labels) {
-        if (label.textContent?.includes('Operation Name')) {
-          const parent = label.parentElement;
-          const nextSibling = parent?.nextElementSibling;
-          if (nextSibling) {
-            return nextSibling.textContent?.trim() || "Not found";
+    // Extract operation name and certifier from the page
+    const pageData = await page.evaluate(() => {
+      let operationName = "Not found";
+      let certifier = "Not found";
+      
+      // Find all text nodes and elements
+      const allElements = Array.from(document.querySelectorAll('*'));
+      
+      for (let i = 0; i < allElements.length; i++) {
+        const element = allElements[i];
+        const text = element.textContent?.trim() || "";
+        
+        // Look for "Operation Name:" label
+        if (text.includes('Operation Name:') && element.nextElementSibling) {
+          const nextText = element.nextElementSibling.textContent?.trim();
+          if (nextText && nextText.length > 0) {
+            operationName = nextText.replace(/^["']|["']$/g, '');
           }
-          const text = parent?.textContent || "";
-          return text.replace("Operation Name:", "").trim() || "Not found";
+        }
+        
+        // Look for "Certifier:" label  
+        if (text.includes('Certifier:') && element.nextElementSibling) {
+          const nextText = element.nextElementSibling.textContent?.trim();
+          if (nextText && nextText.length > 0) {
+            // Extract certifier name from format like "[EKOAGROS] Ekoagros"
+            const match = nextText.match(/\[([^\]]+)\]\s*(.+)/);
+            if (match && match[2]) {
+              certifier = match[2].trim();
+            } else {
+              certifier = nextText;
+            }
+          }
         }
       }
-      return "Not found";
+      
+      return { operationName, certifier };
     });
     
-    // Extract certifier
-    const certifier = await page.evaluate(() => {
-      const labels = Array.from(document.querySelectorAll('strong, td, label'));
-      for (const label of labels) {
-        if (label.textContent?.includes('Certifier:')) {
-          const parent = label.parentElement;
-          const nextSibling = parent?.nextElementSibling;
-          if (nextSibling) {
-            return nextSibling.textContent?.trim() || "Not found";
-          }
-          const text = parent?.textContent || "";
-          return text.replace("Certifier:", "").trim() || "Not found";
-        }
-      }
-      return "Not found";
-    });
+    const operationName = pageData.operationName;
+    const certifier = pageData.certifier;
     
     // Extract scopes from table
     const scopesData = await page.evaluate(() => {
@@ -79,28 +86,37 @@ export async function scrapeUSDAPage(oidNumber: string): Promise<CertificationDa
       }> = [];
       
       const scopeNames = ["CROPS", "HANDLING", "LIVESTOCK", "WILD CROPS"];
-      const rows = Array.from(document.querySelectorAll('table tr'));
+      const tables = Array.from(document.querySelectorAll('table'));
       
-      rows.forEach(row => {
-        const cells = Array.from(row.querySelectorAll('td'));
+      // Find the table that contains scope information
+      for (const table of tables) {
+        const rows = Array.from(table.querySelectorAll('tr'));
         
-        if (cells.length >= 4) {
-          const scopeCell = cells[1]?.textContent?.trim() || "";
+        rows.forEach(row => {
+          const cells = Array.from(row.querySelectorAll('td'));
           
-          if (scopeNames.includes(scopeCell)) {
-            const status = cells[2]?.textContent?.trim() || "Not found";
-            const effectiveDate = cells[3]?.textContent?.trim() || "Not found";
-            const productsText = cells[4]?.textContent?.trim() || "";
+          // Look for rows with scope names
+          for (let i = 0; i < cells.length; i++) {
+            const cellText = cells[i]?.textContent?.trim() || "";
             
-            scopes.push({
-              scope_name: scopeCell,
-              status: status === "--" || status === "N/A" ? "Not certified" : status,
-              effective_date: effectiveDate === "N/A" ? "Not found" : effectiveDate,
-              certified_products: productsText,
-            });
+            if (scopeNames.includes(cellText)) {
+              // Found a scope row - extract data from this and following cells
+              const scopeName = cellText;
+              const status = cells[i + 1]?.textContent?.trim() || "Not found";
+              const effectiveDate = cells[i + 2]?.textContent?.trim() || "Not found";
+              const productsText = cells[i + 3]?.textContent?.trim() || "";
+              
+              scopes.push({
+                scope_name: scopeName,
+                status: status === "--" || status === "N/A" ? "Not certified" : status,
+                effective_date: effectiveDate === "N/A" ? "Not found" : effectiveDate,
+                certified_products: productsText,
+              });
+              break; // Move to next row
+            }
           }
-        }
-      });
+        });
+      }
       
       return scopes;
     });
