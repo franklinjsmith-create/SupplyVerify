@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { StatusBadge } from "./status-badge";
 import type { VerificationResult } from "@shared/schema";
 
@@ -45,7 +45,7 @@ export function ResultsTable({ results }: ResultsTableProps) {
 
   return (
     <div className="rounded-md border border-border bg-card">
-      <ScrollArea className="w-full overflow-auto">
+      <ScrollArea className="w-full">
         <div className="min-w-[1400px]">
           <Table>
           <TableHeader className="sticky top-0 bg-card z-10">
@@ -191,6 +191,7 @@ export function ResultsTable({ results }: ResultsTableProps) {
           </TableBody>
         </Table>
         </div>
+        <ScrollBar orientation="horizontal" />
       </ScrollArea>
     </div>
   );
