@@ -158,6 +158,22 @@ The first request after deployment may take 20-30 seconds as Chromium initialize
 
 ## Troubleshooting
 
+### "libglib-2.0.so.0: cannot open shared object file"
+**Error:** Chromium launches but missing system libraries like `libglib-2.0.so.0`, `libnss3.so`, etc.
+
+**Cause:** System dependencies weren't installed during build
+
+**Solution:** 
+1. Check your build logs - ensure you see "Installing system dependencies for Chromium..."
+2. Verify build command includes: `npm install && bash install-browsers.sh && npm run build`
+3. If Railway: Make sure the build uses a Linux environment (should be automatic)
+4. Redeploy with updated `install-browsers.sh` that includes `playwright install-deps chromium`
+
+**Railway-specific fix:**
+- The updated `install-browsers.sh` now runs `npx playwright install-deps chromium` BEFORE installing the browser
+- This installs all required Linux libraries (glib, nss, X11, etc.)
+- First build after this fix may take 5-7 minutes
+
 ### "Browser executable not found"
 **Solution:** Ensure `install-browsers.sh` ran during build phase. Check build logs for "Installing Playwright Chromium browser..."
 
