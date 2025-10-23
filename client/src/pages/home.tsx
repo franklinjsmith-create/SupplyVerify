@@ -13,6 +13,7 @@ import { EmptyState } from "@/components/empty-state";
 import { ProgressIndicator } from "@/components/progress-indicator";
 import { apiRequest } from "@/lib/queryClient";
 import type { VerificationResponse } from "@shared/schema";
+import * as XLSX from "xlsx";
 
 interface ProgressData {
   total: number;
@@ -152,24 +153,43 @@ export default function Home() {
     verifyTextMutation.mutate(textData);
   };
 
-  const handleDownloadJSON = () => {
+  const handleDownloadExcel = () => {
     if (!results) return;
 
-    const blob = new Blob([JSON.stringify(results, null, 2)], {
-      type: "application/json",
+    // Create worksheet data
+    const worksheetData = results.results.map((result) => ({
+      "Supplier": result.operation_name,
+      "OID Number": result.oid_number,
+      "Certifier": result.certifier,
+      "Status": result.certification_status,
+      "Matching Ingredients": result.matching_ingredients.join(", "),
+      "Missing Ingredients": result.missing_ingredients.join(", "),
+      "Source URL": result.source_url,
+    }));
+
+    // Create workbook and worksheet
+    const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Verification Results");
+
+    // Auto-size columns
+    const maxWidth = 50;
+    const columnWidths = Object.keys(worksheetData[0] || {}).map((key) => {
+      const maxLength = Math.max(
+        key.length,
+        ...worksheetData.map((row) => String(row[key as keyof typeof row] || "").length)
+      );
+      return { wch: Math.min(maxLength + 2, maxWidth) };
     });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `usda-verification-results-${new Date().toISOString().split("T")[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    worksheet["!cols"] = columnWidths;
+
+    // Generate file and trigger download
+    const fileName = `usda-verification-results-${new Date().toISOString().split("T")[0]}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
 
     toast({
       title: "Download started",
-      description: "Results exported as JSON",
+      description: "Results exported as Excel",
     });
   };
 
@@ -190,7 +210,7 @@ export default function Home() {
 
       <main className="container max-w-7xl px-4 md:px-6 lg:px-8 py-8 md:py-12">
         <Card className="mb-8">
-          <CardHeader>
+          <CardHeader className="text-center">
             <CardTitle className="text-2xl">Upload Supplier Data</CardTitle>
             <CardDescription>
               Verify supplier certifications and ingredients against the USDA Organic
@@ -253,12 +273,12 @@ export default function Home() {
               <h2 className="text-2xl font-semibold">Verification Results</h2>
               <Button
                 variant="outline"
-                onClick={handleDownloadJSON}
+                onClick={handleDownloadExcel}
                 className="gap-2"
-                data-testid="button-download-json"
+                data-testid="button-download-excel"
               >
                 <Download className="h-4 w-4" />
-                Download JSON
+                Download Excel
               </Button>
             </div>
 

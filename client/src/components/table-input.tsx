@@ -134,6 +134,12 @@ export function TableInput({ onSubmit, disabled }: TableInputProps) {
           Add Row
         </Button>
 
+        <p className="text-xs text-muted-foreground">
+          Enter the 10-digit NOP ID number and comma-separated ingredients for each supplier
+        </p>
+      </div>
+
+      <div className="flex justify-center pt-2">
         <Button
           onClick={handleSubmit}
           disabled={disabled || !hasValidData}
@@ -143,10 +149,6 @@ export function TableInput({ onSubmit, disabled }: TableInputProps) {
           Verify Suppliers
         </Button>
       </div>
-
-      <p className="text-xs text-muted-foreground">
-        Enter the 10-digit NOP ID number and comma-separated ingredients for each supplier
-      </p>
     </div>
   );
 }

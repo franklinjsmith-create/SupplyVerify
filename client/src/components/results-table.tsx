@@ -39,13 +39,18 @@ export function ResultsTable({ results }: ResultsTableProps) {
                 className="hover-elevate"
                 data-testid={`row-result-${index}`}
               >
-                <TableCell className="font-medium">
+                <TableCell>
                   <div>
-                    <div className="font-medium" data-testid={`text-supplier-${index}`}>
-                      {result.supplier_name}
-                    </div>
-                    {result.operation_name !== "Not found" && (
-                      <div className="text-xs text-muted-foreground mt-0.5">
+                    {result.operation_name !== "Not found" && result.operation_name !== "Supplier" ? (
+                      <div data-testid={`text-supplier-${index}`}>
+                        {result.operation_name}
+                      </div>
+                    ) : result.supplier_name && result.supplier_name !== "Supplier" ? (
+                      <div data-testid={`text-supplier-${index}`}>
+                        {result.supplier_name}
+                      </div>
+                    ) : (
+                      <div className="text-muted-foreground" data-testid={`text-supplier-${index}`}>
                         {result.operation_name}
                       </div>
                     )}
