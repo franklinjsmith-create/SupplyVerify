@@ -50,14 +50,14 @@ export default function Home() {
                 setResults({ results: data.results });
                 toast({
                   title: "Verification complete",
-                  description: `Successfully verified ${data.results.length} supplier(s)`,
+                  description: `Successfully verified ${data.results.length} operation(s)`,
                 });
                 window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
               } else {
                 setSessionId(null);
                 toast({
                   title: "No results",
-                  description: "No suppliers were verified. Please check your input data.",
+                  description: "No operations were verified. Please check your input data.",
                   variant: "destructive",
                 });
               }
@@ -145,10 +145,10 @@ export default function Home() {
     });
   };
 
-  const handleTableSubmit = (data: Array<{ nopId: string; ingredients: string }>) => {
+  const handleTableSubmit = (data: Array<{ nopId: string; products: string }>) => {
     // Convert table data to pipe-delimited format that backend expects
     const textData = data
-      .map((row) => `Supplier | ${row.nopId} | ${row.ingredients}`)
+      .map((row) => `Operation | ${row.nopId} | ${row.products}`)
       .join("\n");
     verifyTextMutation.mutate(textData);
   };
@@ -158,12 +158,12 @@ export default function Home() {
 
     // Create worksheet data
     const worksheetData = results.results.map((result) => ({
-      "Supplier": result.operation_name,
-      "OID Number": result.oid_number,
+      "Operation": result.operation_name,
+      "NOP ID": result.nop_id,
       "Certifier": result.certifier,
       "Status": result.certification_status,
-      "Matching Ingredients": result.matching_ingredients.join(", "),
-      "Missing Ingredients": result.missing_ingredients.join(", "),
+      "Matching Products": result.matching_products.join(", "),
+      "Missing Products": result.missing_products.join(", "),
       "Source URL": result.source_url,
     }));
 
@@ -202,19 +202,18 @@ export default function Home() {
           <div className="flex items-center gap-2">
             <FileUp className="h-6 w-6 text-primary" />
             <h1 className="text-xl font-semibold tracking-tight">
-              USDA Organic Verification Tool
+              USDA Organic Operation Status & Product Verification Tool
             </h1>
           </div>
         </div>
       </header>
 
-      <main className="container max-w-7xl px-4 md:px-6 lg:px-8 py-8 md:py-12">
+      <main className="container max-w-5xl mx-auto px-4 md:px-6 lg:px-8 py-8 md:py-12">
         <Card className="mb-8">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Upload Supplier Data</CardTitle>
+            <CardTitle className="text-2xl">Upload Operation Data</CardTitle>
             <CardDescription>
-              Verify supplier certifications and ingredients against the USDA Organic
-              Integrity Database
+              Verify operation certification status and products against the USDA Organic Integrity Database
             </CardDescription>
           </CardHeader>
           <CardContent>

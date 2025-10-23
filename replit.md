@@ -1,8 +1,8 @@
-# USDA Organic Verification Tool
+# USDA Organic Operation Status & Product Verification Tool
 
 ## Overview
 
-The USDA Organic Verification Tool is a web application that allows users to verify suppliers and ingredients against the USDA Organic Integrity Database (OID). Users can upload spreadsheets (CSV/XLSX) or paste text data to check certification statuses in bulk. The application fetches real-time data from the USDA OID website and provides detailed verification results including matching and missing ingredients for each supplier.
+The USDA Organic Operation Status & Product Verification Tool is a web application that allows users to verify operations and products against the USDA Organic Integrity Database (OID). Users can upload spreadsheets (CSV/XLSX) or manually enter data in a table to check certification statuses in bulk. The application fetches real-time data from the USDA OID website and provides detailed verification results including matching and missing products for each operation.
 
 ## User Preferences
 
@@ -58,24 +58,24 @@ Preferred communication style: Simple, everyday language.
 ### Data Flow
 
 **Input Methods:**
-1. **Manual Table Entry**: Users enter NOP ID# and ingredients directly in a dynamic table interface with add/remove row functionality
-2. **File Upload**: Users upload CSV/XLSX files with supplier data (drag & drop or click to browse)
+1. **Manual Table Entry**: Users enter NOP ID and products directly in a dynamic table interface with add/remove row functionality
+2. **File Upload**: Users upload CSV/XLSX files with operation data (drag & drop or click to browse)
 
 **Processing:**
-1. Table input converts to pipe-delimited format: `Supplier | {nopId} | {ingredients}`
+1. Table input converts to pipe-delimited format: `Operation | {nopId} | {products}`
 2. File uploads are parsed and validated
 3. Data sent to `/api/verify` or `/api/verify-text` endpoint
-4. Backend parses and validates supplier data
-5. For each supplier, backend scrapes USDA OID page using OID number
-6. Certification data extracted and compared against requested ingredients
+4. Backend parses and validates operation data
+5. For each operation, backend scrapes USDA OID page using NOP ID
+6. Certification data extracted and compared against requested products
 7. Operation name populated from USDA scraping results (not user input)
-8. Results aggregated and returned with matching/missing ingredient lists
+8. Results aggregated and returned with matching/missing product lists
 9. Frontend displays summary statistics and detailed table of results
 
 ### External Dependencies
 
 **USDA Organic Integrity Database**: 
-- External data source accessed via web scraping at `https://organic.ams.usda.gov/Integrity/CP/OPP?nopid={nopid}`
+- External data source accessed via web scraping at `https://organic.ams.usda.gov/Integrity/CP/OPP?nopid={nop_id}`
 - No official API available; uses Blazor (client-side JavaScript framework) requiring headless browser
 - Playwright with Chromium handles JavaScript execution and DOM rendering
 - Rate limiting through concurrent batch processing (max 3 simultaneous requests)
@@ -119,8 +119,8 @@ Preferred communication style: Simple, everyday language.
 - Rationale: Maximum flexibility for different user workflows
 - Text input provides quick ad-hoc verification without file creation
 
-**Fuzzy Ingredient Matching**: 
-- Uses substring matching for ingredient comparison
+**Fuzzy Product Matching**: 
+- Uses substring matching for product comparison
 - Rationale: Accounts for variations in product naming conventions
 - Normalizes all text (lowercase, punctuation removal) before comparison
 
@@ -129,11 +129,13 @@ Preferred communication style: Simple, everyday language.
 - Vertical "OR" divider separates the two input methods
 - Rationale: Provides clear visual separation while maintaining easy access to both input methods
 - Responsive: Stacks vertically on mobile devices (<1024px)
+- Main card is centered (max-width: 5xl) for better visual balance
 
 **Dynamic Table Input**:
-- Two-column table with NOP ID# (10-digit numeric) and Ingredients (comma-separated)
+- Two-column table with NOP ID (10-digit numeric) and Products (comma-separated)
 - Add/Remove row functionality for batch entry
 - Input validation: NOP ID limited to digits only, max 10 characters
+- "Verify Operations" button centered at bottom of input card
 - Rationale: Streamlined manual entry for users with small datasets
 - Operation names automatically populated from USDA scraping (not manual input)
 
@@ -148,9 +150,9 @@ This application requires Playwright browser binaries to function in production.
 4. No environment variables required
 
 **Performance in Production:**
-- Single supplier: 5-15 seconds
-- 10 suppliers: 30-50 seconds (concurrent processing)
-- 100 suppliers: 5-8 minutes
+- Single operation: 5-15 seconds
+- 10 operations: 30-50 seconds (concurrent processing)
+- 100 operations: 5-8 minutes
 
 **Requirements:**
 - Node.js 18+

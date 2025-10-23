@@ -111,7 +111,7 @@ export function CompactFileUpload({ onFileSelect, disabled }: CompactFileUploadP
       
       <p className="text-[10px] text-muted-foreground text-center leading-relaxed">
         File should include:<br />
-        OID Number, Ingredients
+        NOP ID, Products
       </p>
     </div>
   );

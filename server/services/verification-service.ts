@@ -1,42 +1,42 @@
 import { scrapeUSDAPage } from "./usda-scraper";
-import type { SupplierInput, VerificationResult } from "@shared/schema";
+import type { OperationInput, VerificationResult } from "@shared/schema";
 
-function normalizeIngredient(ingredient: string): string {
-  return ingredient
+function normalizeProduct(product: string): string {
+  return product
     .toLowerCase()
     .replace(/[^\w\s-]/g, "")
     .replace(/\s+/g, " ")
     .trim();
 }
 
-export async function verifySupplier(
-  supplier: SupplierInput
+export async function verifyOperation(
+  operation: OperationInput
 ): Promise<VerificationResult> {
   try {
-    const certificationData = await scrapeUSDAPage(supplier.oid_number);
+    const certificationData = await scrapeUSDAPage(operation.nop_id);
 
     const allCertifiedProducts = certificationData.scopes.flatMap(
       (scope) => scope.certified_products
     );
 
-    const normalizedUserIngredients = supplier.ingredients.map(normalizeIngredient);
-    const normalizedCertifiedProducts = allCertifiedProducts.map(normalizeIngredient);
+    const normalizedUserProducts = operation.products.map(normalizeProduct);
+    const normalizedCertifiedProducts = allCertifiedProducts.map(normalizeProduct);
 
-    const matchingIngredients: string[] = [];
-    const missingIngredients: string[] = [];
+    const matchingProducts: string[] = [];
+    const missingProducts: string[] = [];
 
-    normalizedUserIngredients.forEach((userIngredient, index) => {
+    normalizedUserProducts.forEach((userProduct, index) => {
       const isMatch = normalizedCertifiedProducts.some((certifiedProduct) => {
         return (
-          certifiedProduct.includes(userIngredient) ||
-          userIngredient.includes(certifiedProduct)
+          certifiedProduct.includes(userProduct) ||
+          userProduct.includes(certifiedProduct)
         );
       });
 
       if (isMatch) {
-        matchingIngredients.push(supplier.ingredients[index]);
+        matchingProducts.push(operation.products[index]);
       } else {
-        missingIngredients.push(supplier.ingredients[index]);
+        missingProducts.push(operation.products[index]);
       }
     });
 
@@ -47,29 +47,27 @@ export async function verifySupplier(
     const certificationStatus = hasCertifiedScope ? "Certified" : "Not certified";
 
     return {
-      supplier_name: supplier.supplier_name,
-      oid_number: supplier.oid_number,
       operation_name: certificationData.operation_name,
+      nop_id: operation.nop_id,
       certifier: certificationData.certifier,
       certification_status: certificationStatus,
-      matching_ingredients: matchingIngredients,
-      missing_ingredients: missingIngredients,
-      source_url: `https://organic.ams.usda.gov/Integrity/CP/OPP?nopid=${supplier.oid_number}`,
+      matching_products: matchingProducts,
+      missing_products: missingProducts,
+      source_url: `https://organic.ams.usda.gov/Integrity/CP/OPP?nopid=${operation.nop_id}`,
       scopes: certificationData.scopes,
     };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error during verification";
-    console.error(`Error verifying supplier ${supplier.supplier_name}:`, errorMessage);
+    console.error(`Error verifying operation ${operation.operation_name}:`, errorMessage);
     
     return {
-      supplier_name: supplier.supplier_name,
-      oid_number: supplier.oid_number,
-      operation_name: "Verification failed",
+      operation_name: operation.operation_name,
+      nop_id: operation.nop_id,
       certifier: "Error",
       certification_status: "Failed",
-      matching_ingredients: [],
-      missing_ingredients: supplier.ingredients,
-      source_url: `https://organic.ams.usda.gov/Integrity/CP/OPP?nopid=${supplier.oid_number}`,
+      matching_products: [],
+      missing_products: operation.products,
+      source_url: `https://organic.ams.usda.gov/Integrity/CP/OPP?nopid=${operation.nop_id}`,
     };
   }
 }
@@ -99,8 +97,8 @@ export function initializeSession(sessionId: string, total: number): void {
   });
 }
 
-export async function verifySuppliers(
-  suppliers: SupplierInput[],
+export async function verifyOperations(
+  operations: OperationInput[],
   sessionId: string
 ): Promise<void> {
   const progress = progressStore.get(sessionId);
@@ -108,9 +106,9 @@ export async function verifySuppliers(
     throw new Error("Session not initialized");
   }
 
-  if (suppliers.length === 0) {
+  if (operations.length === 0) {
     progress.status = "error";
-    progress.error = "No suppliers to verify";
+    progress.error = "No operations to verify";
     progressStore.set(sessionId, { ...progress });
     setTimeout(() => progressStore.delete(sessionId), 60000);
     return;
@@ -122,17 +120,17 @@ export async function verifySuppliers(
   const CONCURRENT_LIMIT = 3;
   
   try {
-    for (let i = 0; i < suppliers.length; i += CONCURRENT_LIMIT) {
-      const batch = suppliers.slice(i, Math.min(i + CONCURRENT_LIMIT, suppliers.length));
+    for (let i = 0; i < operations.length; i += CONCURRENT_LIMIT) {
+      const batch = operations.slice(i, Math.min(i + CONCURRENT_LIMIT, operations.length));
       
-      const batchPromises = batch.map(async (supplier) => {
+      const batchPromises = batch.map(async (operation) => {
         const currentProgress = progressStore.get(sessionId);
         if (currentProgress) {
-          currentProgress.current = supplier.supplier_name;
+          currentProgress.current = operation.operation_name;
           progressStore.set(sessionId, { ...currentProgress });
         }
         
-        const result = await verifySupplier(supplier);
+        const result = await verifyOperation(operation);
         
         const updatedProgress = progressStore.get(sessionId);
         if (updatedProgress) {

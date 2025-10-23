@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import multer from "multer";
 import { randomBytes } from "crypto";
 import { parseCSV, parseXLSX, parseTextInput } from "./services/file-parser";
-import { verifySuppliers, getProgress, initializeSession } from "./services/verification-service";
+import { verifyOperations, getProgress, initializeSession } from "./services/verification-service";
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -42,7 +42,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         parseResult = parseCSV(fileContent);
       }
 
-      if (parseResult.errors.length > 0 && parseResult.suppliers.length === 0) {
+      if (parseResult.errors.length > 0 && parseResult.operations.length === 0) {
         return res.status(400).json({
           error: "Failed to parse file",
           details: parseResult.errors,
@@ -54,13 +54,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const sessionId = randomBytes(16).toString("hex");
-      initializeSession(sessionId, parseResult.suppliers.length);
+      initializeSession(sessionId, parseResult.operations.length);
 
-      verifySuppliers(parseResult.suppliers, sessionId).catch((error) => {
+      verifyOperations(parseResult.operations, sessionId).catch((error) => {
         console.error("Background verification error:", error);
       });
 
-      res.json({ sessionId, total: parseResult.suppliers.length });
+      res.json({ sessionId, total: parseResult.operations.length });
     } catch (error) {
       console.error("Error processing file upload:", error);
       res.status(500).json({
@@ -80,7 +80,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const parseResult = parseTextInput(text);
 
-      if (parseResult.errors.length > 0 && parseResult.suppliers.length === 0) {
+      if (parseResult.errors.length > 0 && parseResult.operations.length === 0) {
         return res.status(400).json({
           error: "Failed to parse text",
           details: parseResult.errors,
@@ -92,13 +92,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const sessionId = randomBytes(16).toString("hex");
-      initializeSession(sessionId, parseResult.suppliers.length);
+      initializeSession(sessionId, parseResult.operations.length);
 
-      verifySuppliers(parseResult.suppliers, sessionId).catch((error) => {
+      verifyOperations(parseResult.operations, sessionId).catch((error) => {
         console.error("Background verification error:", error);
       });
 
-      res.json({ sessionId, total: parseResult.suppliers.length });
+      res.json({ sessionId, total: parseResult.operations.length });
     } catch (error) {
       console.error("Error processing text input:", error);
       res.status(500).json({

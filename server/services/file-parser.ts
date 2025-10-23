@@ -1,15 +1,15 @@
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
-import { supplierInputSchema } from "@shared/schema";
-import type { SupplierInput } from "@shared/schema";
+import { operationInputSchema } from "@shared/schema";
+import type { OperationInput } from "@shared/schema";
 
-export interface ParsedSupplierData {
-  suppliers: SupplierInput[];
+export interface ParsedOperationData {
+  operations: OperationInput[];
   errors: string[];
 }
 
-export function parseCSV(fileContent: string): ParsedSupplierData {
-  const suppliers: SupplierInput[] = [];
+export function parseCSV(fileContent: string): ParsedOperationData {
+  const operations: OperationInput[] = [];
   const errors: string[] = [];
 
   const result = Papa.parse(fileContent, {
@@ -28,50 +28,50 @@ export function parseCSV(fileContent: string): ParsedSupplierData {
 
   result.data.forEach((row: any, index: number) => {
     try {
-      const supplierName = row.supplier_name || row.supplier || "";
-      const oidNumber = row.oid_number || row.oid || row.oid_num || "";
-      const ingredientsRaw = row.ingredients || row.ingredient || "";
+      const operationName = row.operation_name || row.operation || row.supplier_name || row.supplier || "";
+      const nopId = row.nop_id || row.nopid || row.oid_number || row.oid || row.oid_num || "";
+      const productsRaw = row.products || row.product || row.ingredients || row.ingredient || "";
 
-      if (!supplierName || !oidNumber || !ingredientsRaw) {
+      if (!operationName || !nopId || !productsRaw) {
         errors.push(
-          `Row ${index + 1}: Missing required fields (Supplier Name, OID Number, or Ingredients)`
+          `Row ${index + 1}: Missing required fields (Operation Name, NOP ID, or Products)`
         );
         return;
       }
 
-      const ingredients = ingredientsRaw
+      const products = productsRaw
         .split(",")
-        .map((ing: string) => ing.trim())
-        .filter((ing: string) => ing.length > 0);
+        .map((prod: string) => prod.trim())
+        .filter((prod: string) => prod.length > 0);
 
-      if (ingredients.length === 0) {
-        errors.push(`Row ${index + 1}: No valid ingredients found`);
+      if (products.length === 0) {
+        errors.push(`Row ${index + 1}: No valid products found`);
         return;
       }
 
-      const supplier = {
-        supplier_name: supplierName.trim(),
-        oid_number: oidNumber.trim(),
-        ingredients,
+      const operation = {
+        operation_name: operationName.trim(),
+        nop_id: nopId.trim(),
+        products,
       };
 
-      const validation = supplierInputSchema.safeParse(supplier);
+      const validation = operationInputSchema.safeParse(operation);
       if (!validation.success) {
         errors.push(`Row ${index + 1}: Validation failed - ${validation.error.message}`);
         return;
       }
 
-      suppliers.push(supplier);
+      operations.push(operation);
     } catch (error) {
       errors.push(`Row ${index + 1}: ${error instanceof Error ? error.message : "Unknown error"}`);
     }
   });
 
-  return { suppliers, errors };
+  return { operations, errors };
 }
 
-export function parseXLSX(fileBuffer: Buffer): ParsedSupplierData {
-  const suppliers: SupplierInput[] = [];
+export function parseXLSX(fileBuffer: Buffer): ParsedOperationData {
+  const operations: OperationInput[] = [];
   const errors: string[] = [];
 
   try {
@@ -79,7 +79,7 @@ export function parseXLSX(fileBuffer: Buffer): ParsedSupplierData {
     
     if (workbook.SheetNames.length === 0) {
       errors.push("XLSX file contains no sheets");
-      return { suppliers, errors };
+      return { operations, errors };
     }
 
     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -97,54 +97,54 @@ export function parseXLSX(fileBuffer: Buffer): ParsedSupplierData {
           normalizedRow[normalizeKey(key)] = row[key];
         });
 
-        const supplierName = normalizedRow.supplier_name || normalizedRow.supplier || "";
-        const oidNumber = normalizedRow.oid_number || normalizedRow.oid || normalizedRow.oid_num || "";
-        const ingredientsRaw = normalizedRow.ingredients || normalizedRow.ingredient || "";
+        const operationName = normalizedRow.operation_name || normalizedRow.operation || normalizedRow.supplier_name || normalizedRow.supplier || "";
+        const nopId = normalizedRow.nop_id || normalizedRow.nopid || normalizedRow.oid_number || normalizedRow.oid || normalizedRow.oid_num || "";
+        const productsRaw = normalizedRow.products || normalizedRow.product || normalizedRow.ingredients || normalizedRow.ingredient || "";
 
-        if (!supplierName || !oidNumber || !ingredientsRaw) {
+        if (!operationName || !nopId || !productsRaw) {
           errors.push(
-            `Row ${index + 2}: Missing required fields (Supplier Name, OID Number, or Ingredients)`
+            `Row ${index + 2}: Missing required fields (Operation Name, NOP ID, or Products)`
           );
           return;
         }
 
-        const ingredients = String(ingredientsRaw)
+        const products = String(productsRaw)
           .split(",")
-          .map((ing: string) => ing.trim())
-          .filter((ing: string) => ing.length > 0);
+          .map((prod: string) => prod.trim())
+          .filter((prod: string) => prod.length > 0);
 
-        if (ingredients.length === 0) {
-          errors.push(`Row ${index + 2}: No valid ingredients found`);
+        if (products.length === 0) {
+          errors.push(`Row ${index + 2}: No valid products found`);
           return;
         }
 
-        const supplier = {
-          supplier_name: String(supplierName).trim(),
-          oid_number: String(oidNumber).trim(),
-          ingredients,
+        const operation = {
+          operation_name: String(operationName).trim(),
+          nop_id: String(nopId).trim(),
+          products,
         };
 
-        const validation = supplierInputSchema.safeParse(supplier);
+        const validation = operationInputSchema.safeParse(operation);
         if (!validation.success) {
           errors.push(`Row ${index + 2}: Validation failed - ${validation.error.message}`);
           return;
         }
 
-        suppliers.push(supplier);
+        operations.push(operation);
       } catch (error) {
         errors.push(`Row ${index + 2}: ${error instanceof Error ? error.message : "Unknown error"}`);
       }
     });
 
-    return { suppliers, errors };
+    return { operations, errors };
   } catch (error) {
     errors.push(`XLSX parsing error: ${error instanceof Error ? error.message : "Unknown error"}`);
-    return { suppliers, errors };
+    return { operations, errors };
   }
 }
 
-export function parseTextInput(text: string): ParsedSupplierData {
-  const suppliers: SupplierInput[] = [];
+export function parseTextInput(text: string): ParsedOperationData {
+  const operations: OperationInput[] = [];
   const errors: string[] = [];
 
   const lines = text.split("\n").filter((line) => line.trim().length > 0);
@@ -155,45 +155,45 @@ export function parseTextInput(text: string): ParsedSupplierData {
 
       if (parts.length < 3) {
         errors.push(
-          `Line ${index + 1}: Invalid format. Expected: Supplier Name | OID Number | Ingredients`
+          `Line ${index + 1}: Invalid format. Expected: Operation Name | NOP ID | Products`
         );
         return;
       }
 
-      const [supplierName, oidNumber, ingredientsRaw] = parts;
+      const [operationName, nopId, productsRaw] = parts;
 
-      if (!supplierName || !oidNumber || !ingredientsRaw) {
+      if (!operationName || !nopId || !productsRaw) {
         errors.push(`Line ${index + 1}: Missing required fields`);
         return;
       }
 
-      const ingredients = ingredientsRaw
+      const products = productsRaw
         .split(",")
-        .map((ing) => ing.trim())
-        .filter((ing) => ing.length > 0);
+        .map((prod) => prod.trim())
+        .filter((prod) => prod.length > 0);
 
-      if (ingredients.length === 0) {
-        errors.push(`Line ${index + 1}: No valid ingredients found`);
+      if (products.length === 0) {
+        errors.push(`Line ${index + 1}: No valid products found`);
         return;
       }
 
-      const supplier = {
-        supplier_name: supplierName,
-        oid_number: oidNumber,
-        ingredients,
+      const operation = {
+        operation_name: operationName,
+        nop_id: nopId,
+        products,
       };
 
-      const validation = supplierInputSchema.safeParse(supplier);
+      const validation = operationInputSchema.safeParse(operation);
       if (!validation.success) {
         errors.push(`Line ${index + 1}: Validation failed - ${validation.error.message}`);
         return;
       }
 
-      suppliers.push(supplier);
+      operations.push(operation);
     } catch (error) {
       errors.push(`Line ${index + 1}: ${error instanceof Error ? error.message : "Unknown error"}`);
     }
   });
 
-  return { suppliers, errors };
+  return { operations, errors };
 }

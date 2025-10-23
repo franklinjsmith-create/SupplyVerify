@@ -12,23 +12,23 @@ import {
 } from "@/components/ui/table";
 
 interface TableInputProps {
-  onSubmit: (data: Array<{ nopId: string; ingredients: string }>) => void;
+  onSubmit: (data: Array<{ nopId: string; products: string }>) => void;
   disabled?: boolean;
 }
 
 interface Row {
   id: string;
   nopId: string;
-  ingredients: string;
+  products: string;
 }
 
 export function TableInput({ onSubmit, disabled }: TableInputProps) {
   const [rows, setRows] = useState<Row[]>([
-    { id: crypto.randomUUID(), nopId: "", ingredients: "" },
+    { id: crypto.randomUUID(), nopId: "", products: "" },
   ]);
 
   const handleAddRow = () => {
-    setRows([...rows, { id: crypto.randomUUID(), nopId: "", ingredients: "" }]);
+    setRows([...rows, { id: crypto.randomUUID(), nopId: "", products: "" }]);
   };
 
   const handleRemoveRow = (id: string) => {
@@ -45,15 +45,15 @@ export function TableInput({ onSubmit, disabled }: TableInputProps) {
     );
   };
 
-  const handleIngredientsChange = (id: string, value: string) => {
+  const handleProductsChange = (id: string, value: string) => {
     setRows(
-      rows.map((row) => (row.id === id ? { ...row, ingredients: value } : row))
+      rows.map((row) => (row.id === id ? { ...row, products: value } : row))
     );
   };
 
   const handleSubmit = () => {
     const validRows = rows.filter(
-      (row) => row.nopId.trim() && row.ingredients.trim()
+      (row) => row.nopId.trim() && row.products.trim()
     );
     if (validRows.length > 0) {
       onSubmit(validRows);
@@ -61,7 +61,7 @@ export function TableInput({ onSubmit, disabled }: TableInputProps) {
   };
 
   const hasValidData = rows.some(
-    (row) => row.nopId.trim() && row.ingredients.trim()
+    (row) => row.nopId.trim() && row.products.trim()
   );
 
   return (
@@ -70,8 +70,8 @@ export function TableInput({ onSubmit, disabled }: TableInputProps) {
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
-              <TableHead className="w-[200px] font-semibold">NOP ID#</TableHead>
-              <TableHead className="font-semibold">Ingredients</TableHead>
+              <TableHead className="w-[200px] font-semibold">NOP ID</TableHead>
+              <TableHead className="font-semibold">Products</TableHead>
               <TableHead className="w-[60px]"></TableHead>
             </TableRow>
           </TableHeader>
@@ -94,12 +94,12 @@ export function TableInput({ onSubmit, disabled }: TableInputProps) {
                   <Input
                     type="text"
                     placeholder="e.g., ginger, turmeric, black pepper"
-                    value={row.ingredients}
+                    value={row.products}
                     onChange={(e) =>
-                      handleIngredientsChange(row.id, e.target.value)
+                      handleProductsChange(row.id, e.target.value)
                     }
                     disabled={disabled}
-                    data-testid={`input-ingredients-${index}`}
+                    data-testid={`input-products-${index}`}
                   />
                 </TableCell>
                 <TableCell>
@@ -135,7 +135,7 @@ export function TableInput({ onSubmit, disabled }: TableInputProps) {
         </Button>
 
         <p className="text-xs text-muted-foreground">
-          Enter the 10-digit NOP ID number and comma-separated ingredients for each supplier
+          Enter the 10-digit NOP ID and comma-separated products for each operation
         </p>
       </div>
 
@@ -146,7 +146,7 @@ export function TableInput({ onSubmit, disabled }: TableInputProps) {
           size="lg"
           data-testid="button-verify-table"
         >
-          Verify Suppliers
+          Verify Operations
         </Button>
       </div>
     </div>

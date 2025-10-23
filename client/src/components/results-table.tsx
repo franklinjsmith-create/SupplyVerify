@@ -23,41 +23,37 @@ export function ResultsTable({ results }: ResultsTableProps) {
         <Table>
           <TableHeader className="sticky top-0 bg-card z-10">
             <TableRow>
-              <TableHead className="min-w-[180px]">Supplier</TableHead>
-              <TableHead className="min-w-[120px] font-mono">OID Number</TableHead>
+              <TableHead className="min-w-[180px]">Operation</TableHead>
+              <TableHead className="min-w-[120px] font-mono">NOP ID</TableHead>
               <TableHead className="min-w-[180px]">Certifier</TableHead>
               <TableHead className="min-w-[120px]">Status</TableHead>
-              <TableHead className="min-w-[200px]">Matching Ingredients</TableHead>
-              <TableHead className="min-w-[200px]">Missing Ingredients</TableHead>
+              <TableHead className="min-w-[200px]">Matching Products</TableHead>
+              <TableHead className="min-w-[200px]">Missing Products</TableHead>
               <TableHead className="min-w-[100px]">Source</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {results.map((result, index) => (
               <TableRow
-                key={`${result.oid_number}-${index}`}
+                key={`${result.nop_id}-${index}`}
                 className="hover-elevate"
                 data-testid={`row-result-${index}`}
               >
                 <TableCell>
                   <div>
-                    {result.operation_name !== "Not found" && result.operation_name !== "Supplier" ? (
-                      <div data-testid={`text-supplier-${index}`}>
+                    {result.operation_name !== "Not found" && result.operation_name !== "Operation" ? (
+                      <div data-testid={`text-operation-${index}`}>
                         {result.operation_name}
                       </div>
-                    ) : result.supplier_name && result.supplier_name !== "Supplier" ? (
-                      <div data-testid={`text-supplier-${index}`}>
-                        {result.supplier_name}
-                      </div>
                     ) : (
-                      <div className="text-muted-foreground" data-testid={`text-supplier-${index}`}>
+                      <div className="text-muted-foreground" data-testid={`text-operation-${index}`}>
                         {result.operation_name}
                       </div>
                     )}
                   </div>
                 </TableCell>
-                <TableCell className="font-mono text-sm" data-testid={`text-oid-${index}`}>
-                  {result.oid_number}
+                <TableCell className="font-mono text-sm" data-testid={`text-nop-id-${index}`}>
+                  {result.nop_id}
                 </TableCell>
                 <TableCell data-testid={`text-certifier-${index}`}>
                   {result.certifier}
@@ -66,12 +62,12 @@ export function ResultsTable({ results }: ResultsTableProps) {
                   <StatusBadge status={result.certification_status} />
                 </TableCell>
                 <TableCell>
-                  {result.matching_ingredients.length > 0 ? (
+                  {result.matching_products.length > 0 ? (
                     <ScrollArea className="max-h-32">
                       <ul className="text-sm space-y-1" data-testid={`list-matching-${index}`}>
-                        {result.matching_ingredients.map((ingredient, i) => (
+                        {result.matching_products.map((product, i) => (
                           <li key={i} className="text-[hsl(var(--status-certified))]">
-                            • {ingredient}
+                            • {product}
                           </li>
                         ))}
                       </ul>
@@ -81,12 +77,12 @@ export function ResultsTable({ results }: ResultsTableProps) {
                   )}
                 </TableCell>
                 <TableCell>
-                  {result.missing_ingredients.length > 0 ? (
+                  {result.missing_products.length > 0 ? (
                     <ScrollArea className="max-h-32">
                       <ul className="text-sm space-y-1" data-testid={`list-missing-${index}`}>
-                        {result.missing_ingredients.map((ingredient, i) => (
+                        {result.missing_products.map((product, i) => (
                           <li key={i} className="text-[hsl(var(--status-warning))]">
-                            • {ingredient}
+                            • {product}
                           </li>
                         ))}
                       </ul>

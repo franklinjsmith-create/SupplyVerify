@@ -15,7 +15,7 @@ export function ProgressIndicator({ current, total, currentSupplier }: ProgressI
       <div className="flex flex-col items-center justify-center">
         <Loader2 className="h-10 w-10 text-primary animate-spin mb-4" />
         <p className="text-lg font-medium text-foreground">
-          Verifying suppliers...
+          Verifying operations...
         </p>
         {currentSupplier && (
           <p className="text-sm text-muted-foreground mt-2">
@@ -27,7 +27,7 @@ export function ProgressIndicator({ current, total, currentSupplier }: ProgressI
       <div className="max-w-md mx-auto space-y-2">
         <Progress value={percentage} className="h-2" />
         <p className="text-sm text-center text-muted-foreground">
-          {current} of {total} suppliers verified ({percentage}%)
+          {current} of {total} operations verified ({percentage}%)
         </p>
       </div>
     </div>
