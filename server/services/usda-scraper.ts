@@ -45,8 +45,8 @@ export async function scrapeUSDAPage(oidNumber: string): Promise<CertificationDa
              allText.includes('LIVESTOCK') || allText.includes('WILD CROPS');
     }, { timeout: 15000 });
     
-    // Additional stability wait: ensure the DOM has settled after Blazor updates
-    await page.waitForTimeout(1500);
+    // Additional stability wait: ensure the DOM has settled after Blazor updates (optimized from 1500ms)
+    await page.waitForTimeout(500);
     
     // Extract operation name and certifier from the page
     const pageData = await page.evaluate(() => {

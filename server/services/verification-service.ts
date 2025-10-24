@@ -124,7 +124,7 @@ export async function verifyOperations(
   progress.status = "processing";
   progressStore.set(sessionId, { ...progress });
 
-  const CONCURRENT_LIMIT = 3;
+  const CONCURRENT_LIMIT = 5;
   
   try {
     for (let i = 0; i < operations.length; i += CONCURRENT_LIMIT) {
