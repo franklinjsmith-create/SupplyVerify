@@ -32,7 +32,7 @@
 
   --sidebar-border: 210 17% 90%;
 
-  --sidebar-primary: 76 59% 45%;
+  --sidebar-primary: 122 39% 49%;
 
   --sidebar-primary-foreground: 0 0% 100%;
 
@@ -40,7 +40,7 @@
 
   --sidebar-accent-foreground: 220 13% 18%;
 
-  --sidebar-ring: 76 59% 45%;
+  --sidebar-ring: 122 39% 49%;
 
   --popover: 0 0% 100%;
 
@@ -48,9 +48,11 @@
 
   --popover-border: 210 17% 90%;
 
-  --primary: 76 59% 45%;
+  --primary: 122 39% 49%;
 
   --primary-foreground: 0 0% 100%;
+  
+  --primary-hover: 124 41% 40%;
 
   --secondary: 210 17% 94%;
 
@@ -69,8 +71,8 @@
   --destructive-foreground: 0 0% 100%;
 
   --input: 210 17% 82%;
-  --ring: 76 59% 45%;
-  --chart-1: 76 59% 45%;
+  --ring: 122 39% 49%;
+  --chart-1: 122 39% 49%;
   --chart-2: 142 71% 45%;
   --chart-3: 207 90% 54%;
   --chart-4: 38 92% 50%;
@@ -92,9 +94,9 @@
   --spacing: 0.25rem;
 
   /* Status colors for USDA verification tool */
-  --status-certified: 142 71% 45%;
+  --status-certified: 122 39% 49%;
   --status-certified-foreground: 0 0% 100%;
-  --status-certified-bg: 142 71% 96%;
+  --status-certified-bg: 122 39% 96%;
   --status-warning: 38 92% 50%;
   --status-warning-foreground: 220 13% 18%;
   --status-warning-bg: 38 92% 95%;
@@ -164,7 +166,7 @@
 
   --sidebar-border: 220 13% 22%;
 
-  --sidebar-primary: 76 59% 65%;
+  --sidebar-primary: 122 39% 59%;
 
   --sidebar-primary-foreground: 220 13% 13%;
 
@@ -172,7 +174,7 @@
 
   --sidebar-accent-foreground: 210 17% 98%;
 
-  --sidebar-ring: 76 59% 65%;
+  --sidebar-ring: 122 39% 59%;
 
   --popover: 220 13% 18%;
 
@@ -180,9 +182,11 @@
 
   --popover-border: 220 13% 24%;
 
-  --primary: 76 59% 55%;
+  --primary: 122 39% 59%;
 
   --primary-foreground: 220 13% 13%;
+  
+  --primary-hover: 124 41% 50%;
 
   --secondary: 220 13% 22%;
 
@@ -201,8 +205,8 @@
   --destructive-foreground: 0 0% 100%;
 
   --input: 220 13% 28%;
-  --ring: 76 59% 65%;
-  --chart-1: 76 59% 65%;
+  --ring: 122 39% 59%;
+  --chart-1: 122 39% 59%;
   --chart-2: 142 71% 55%;
   --chart-3: 207 90% 64%;
   --chart-4: 38 92% 60%;
@@ -218,9 +222,9 @@
   --shadow-2xl: 0px 25px 50px -12px hsl(0 0% 0% / 0.40);
 
   /* Status colors for USDA verification tool */
-  --status-certified: 142 71% 55%;
+  --status-certified: 122 39% 59%;
   --status-certified-foreground: 220 13% 13%;
-  --status-certified-bg: 142 71% 18%;
+  --status-certified-bg: 122 39% 18%;
   --status-warning: 38 92% 60%;
   --status-warning-foreground: 220 13% 13%;
   --status-warning-bg: 38 92% 20%;

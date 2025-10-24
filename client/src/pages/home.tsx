@@ -207,6 +207,18 @@ export default function Home() {
               USDA Organic Certification Verification Tool
             </h1>
           </div>
+          <Button
+            variant="outline"
+            asChild
+            className="border-primary text-primary hover:bg-[hsl(var(--primary-hover))] hover:text-primary-foreground"
+            data-testid="button-back-to-askorganicbot"
+          >
+            <a href="https://askorganicbot.com" className="flex items-center gap-2">
+              <span>←</span>
+              <span className="hidden sm:inline">Back to AskOrganicBot</span>
+              <span className="sm:hidden">Back</span>
+            </a>
+          </Button>
         </div>
       </header>
 
