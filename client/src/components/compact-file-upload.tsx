@@ -68,8 +68,8 @@ export function CompactFileUpload({ onFileSelect, disabled }: CompactFileUploadP
       onDrop={handleDrop}
       className={`
         relative flex flex-col items-center justify-center
-        h-full min-h-[280px] rounded-md border-2 border-dashed
-        transition-all duration-150 ease-in-out p-6
+        h-full min-h-[240px] sm:min-h-[280px] rounded-md border-2 border-dashed
+        transition-all duration-150 ease-in-out p-4 sm:p-6
         ${
           isDragActive
             ? "border-primary bg-primary/10"
@@ -88,17 +88,17 @@ export function CompactFileUpload({ onFileSelect, disabled }: CompactFileUploadP
         data-testid="input-file"
       />
       
-      <Upload className="h-10 w-10 text-primary mb-3" />
+      <Upload className="h-8 w-8 sm:h-10 sm:w-10 text-primary mb-2 sm:mb-3" />
       
-      <p className="text-base font-medium text-foreground mb-1 text-center">
+      <p className="text-sm sm:text-base font-medium text-foreground mb-1 text-center">
         Drop file here
       </p>
       
-      <p className="text-xs text-muted-foreground mb-4 text-center">
+      <p className="text-xs text-muted-foreground mb-3 sm:mb-4 text-center">
         or click to browse
       </p>
       
-      <div className="flex gap-2 mb-3">
+      <div className="flex gap-2 mb-2 sm:mb-3">
         <Badge variant="secondary" className="gap-1.5 text-xs">
           <FileText className="h-3 w-3" />
           CSV

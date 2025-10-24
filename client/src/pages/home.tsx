@@ -200,33 +200,33 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
-        <div className="container flex h-16 items-center justify-between px-4 md:px-6 lg:px-8">
-          <div className="flex items-center gap-2">
-            <FileUp className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-semibold tracking-tight">
+        <div className="container flex h-14 sm:h-16 items-center justify-between gap-2 sm:gap-4 px-3 sm:px-4 md:px-6 lg:px-8">
+          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
+            <FileUp className="h-5 w-5 sm:h-6 sm:w-6 text-primary shrink-0" />
+            <h1 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold tracking-tight truncate">
               USDA Organic Certification Verification Tool
             </h1>
           </div>
           <Button
             variant="outline"
             asChild
-            className="border-primary text-primary hover:bg-[hsl(var(--primary-hover))] hover:text-primary-foreground"
+            className="border-primary text-primary hover:bg-[hsl(var(--primary-hover))] hover:text-primary-foreground shrink-0"
             data-testid="button-back-to-askorganicbot"
           >
-            <a href="https://askorganicbot.com" className="flex items-center gap-2">
-              <span>←</span>
-              <span className="hidden sm:inline">Back to AskOrganicBot</span>
-              <span className="sm:hidden">Back</span>
+            <a href="https://askorganicbot.com" className="flex items-center gap-1.5 sm:gap-2">
+              <span className="text-sm sm:text-base">←</span>
+              <span className="hidden sm:inline text-sm">Back to AskOrganicBot</span>
+              <span className="sm:hidden text-sm">Back</span>
             </a>
           </Button>
         </div>
       </header>
 
-      <main className="container max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-8 md:py-12">
-        <Card className="mb-8">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Verify Organic Certification Data</CardTitle>
-            <CardDescription>
+      <main className="container max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 md:py-12">
+        <Card className="mb-6 sm:mb-8">
+          <CardHeader className="text-center px-4 sm:px-6">
+            <CardTitle className="text-xl sm:text-2xl">Verify Organic Certification Data</CardTitle>
+            <CardDescription className="text-sm sm:text-base">
               Upload operation NOP IDs and product names to confirm current USDA Organic certification status in real time, sourced directly from the USDA Organic Integrity Database.
             </CardDescription>
           </CardHeader>
@@ -281,13 +281,13 @@ export default function Home() {
         {!isLoading && !results && <EmptyState />}
 
         {!isLoading && results && (
-          <div className="space-y-8">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-semibold">Verification Results</h2>
+          <div className="space-y-6 sm:space-y-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+              <h2 className="text-xl sm:text-2xl font-semibold">Verification Results</h2>
               <Button
                 variant="outline"
                 onClick={handleDownloadExcel}
-                className="gap-2"
+                className="gap-2 w-full sm:w-auto"
                 data-testid="button-download-excel"
               >
                 <Download className="h-4 w-4" />
@@ -298,16 +298,16 @@ export default function Home() {
             <ResultsSummary results={results.results} />
 
             <div>
-              <h3 className="text-xl font-semibold mb-4">Detailed Results</h3>
+              <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Detailed Results</h3>
               <ResultsTable results={results.results} />
             </div>
           </div>
         )}
       </main>
 
-      <footer className="border-t border-border bg-card mt-16">
-        <div className="container max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6">
-          <p className="text-sm text-muted-foreground text-center">
+      <footer className="border-t border-border bg-card mt-12 sm:mt-16">
+        <div className="container max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6">
+          <p className="text-xs sm:text-sm text-muted-foreground text-center">
             Data sourced live from the USDA Organic Integrity Database (OID).
           </p>
         </div>
