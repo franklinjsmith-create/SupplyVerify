@@ -308,9 +308,14 @@ export default function Home() {
 
       <footer className="border-t border-border bg-card mt-12 sm:mt-16">
         <div className="container max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6">
-          <p className="text-xs sm:text-sm text-muted-foreground text-center">
-            Data sourced live from the USDA Organic Integrity Database (OID).
-          </p>
+          <div className="space-y-3 text-center">
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Data sourced live from the USDA Organic Integrity Database (OID). This tool is provided for informational purposes only and should not be relied upon as an official certification determination. Users are responsible for verifying all information with the certifier or the USDA NOP.
+            </p>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              hello@askorganicbot.com | Made with ❤️ in Oregon
+            </p>
+          </div>
         </div>
       </footer>
     </div>
