@@ -37,6 +37,17 @@ export async function scrapeUSDAPage(oidNumber: string): Promise<CertificationDa
     // Wait for the content to be rendered (wait for operation name to appear)
     await page.waitForSelector('text=Operation Name', { timeout: 10000 });
     
+    // CRITICAL: Wait for the scope table to fully load (Blazor renders this after operation name)
+    // Wait for at least one scope name to appear in the table, indicating products data is rendered
+    await page.waitForFunction(() => {
+      const allText = document.body.textContent || '';
+      return allText.includes('CROPS') || allText.includes('HANDLING') || 
+             allText.includes('LIVESTOCK') || allText.includes('WILD CROPS');
+    }, { timeout: 15000 });
+    
+    // Additional stability wait: ensure the DOM has settled after Blazor updates
+    await page.waitForTimeout(1500);
+    
     // Extract operation name and certifier from the page
     const pageData = await page.evaluate(() => {
       let operationName = "Not found";

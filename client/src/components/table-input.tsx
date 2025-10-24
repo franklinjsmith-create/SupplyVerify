@@ -70,9 +70,9 @@ export function TableInput({ onSubmit, disabled }: TableInputProps) {
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
-              <TableHead className="w-[200px] font-semibold">NOP ID</TableHead>
+              <TableHead className="w-[140px] sm:w-[180px] font-semibold">NOP ID</TableHead>
               <TableHead className="font-semibold">Products</TableHead>
-              <TableHead className="w-[60px]"></TableHead>
+              <TableHead className="w-[50px] sm:w-[60px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
