@@ -23,10 +23,26 @@ interface ExpandedRows {
 }
 
 export function ResultsTable({ results }: ResultsTableProps) {
-  const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
+  const [expandedAllProducts, setExpandedAllProducts] = useState<ExpandedRows>({});
+  const [expandedMatchingProducts, setExpandedMatchingProducts] = useState<ExpandedRows>({});
+  const [expandedMissingProducts, setExpandedMissingProducts] = useState<ExpandedRows>({});
 
-  const toggleRow = (index: number) => {
-    setExpandedRows(prev => ({
+  const toggleAllProducts = (index: number) => {
+    setExpandedAllProducts(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
+  };
+
+  const toggleMatchingProducts = (index: number) => {
+    setExpandedMatchingProducts(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
+  };
+
+  const toggleMissingProducts = (index: number) => {
+    setExpandedMissingProducts(prev => ({
       ...prev,
       [index]: !prev[index]
     }));
@@ -102,30 +118,74 @@ export function ResultsTable({ results }: ResultsTableProps) {
                     </TableCell>
                     <TableCell>
                       {result.matching_products.length > 0 ? (
-                        <ScrollArea className="max-h-32">
-                          <ul className="text-sm space-y-1" data-testid={`list-matching-${index}`}>
-                            {result.matching_products.map((product, i) => (
-                              <li key={i} className="text-[hsl(var(--status-certified))]">
-                                • {product}
-                              </li>
-                            ))}
-                          </ul>
-                        </ScrollArea>
+                        <div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleMatchingProducts(index)}
+                            className="gap-1.5 p-2"
+                            data-testid={`button-expand-matching-${index}`}
+                          >
+                            {expandedMatchingProducts[index] ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                            <span className="text-xs">
+                              {result.matching_products.length} product{result.matching_products.length !== 1 ? 's' : ''}
+                            </span>
+                          </Button>
+                          {expandedMatchingProducts[index] && (
+                            <ScrollArea className="h-96 mt-2">
+                              <div className="pr-4">
+                                <ul className="text-sm space-y-1.5 pl-2" data-testid={`list-matching-${index}`}>
+                                  {result.matching_products.map((product, i) => (
+                                    <li key={i} className="text-[hsl(var(--status-certified))] break-words">
+                                      • {product}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            </ScrollArea>
+                          )}
+                        </div>
                       ) : (
                         <span className="text-sm text-muted-foreground">None</span>
                       )}
                     </TableCell>
                     <TableCell>
                       {result.missing_products.length > 0 ? (
-                        <ScrollArea className="max-h-32">
-                          <ul className="text-sm space-y-1" data-testid={`list-missing-${index}`}>
-                            {result.missing_products.map((product, i) => (
-                              <li key={i} className="text-[hsl(var(--status-warning))]">
-                                • {product}
-                              </li>
-                            ))}
-                          </ul>
-                        </ScrollArea>
+                        <div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleMissingProducts(index)}
+                            className="gap-1.5 p-2"
+                            data-testid={`button-expand-missing-${index}`}
+                          >
+                            {expandedMissingProducts[index] ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                            <span className="text-xs">
+                              {result.missing_products.length} product{result.missing_products.length !== 1 ? 's' : ''}
+                            </span>
+                          </Button>
+                          {expandedMissingProducts[index] && (
+                            <ScrollArea className="h-96 mt-2">
+                              <div className="pr-4">
+                                <ul className="text-sm space-y-1.5 pl-2" data-testid={`list-missing-${index}`}>
+                                  {result.missing_products.map((product, i) => (
+                                    <li key={i} className="text-[hsl(var(--status-warning))] break-words">
+                                      • {product}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            </ScrollArea>
+                          )}
+                        </div>
                       ) : (
                         <span className="text-sm text-muted-foreground">None</span>
                       )}
@@ -136,11 +196,11 @@ export function ResultsTable({ results }: ResultsTableProps) {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => toggleRow(index)}
+                            onClick={() => toggleAllProducts(index)}
                             className="gap-1.5 p-2"
                             data-testid={`button-expand-products-${index}`}
                           >
-                            {expandedRows[index] ? (
+                            {expandedAllProducts[index] ? (
                               <ChevronDown className="h-4 w-4" />
                             ) : (
                               <ChevronRight className="h-4 w-4" />
@@ -149,7 +209,7 @@ export function ResultsTable({ results }: ResultsTableProps) {
                               {result.all_certified_products.length} product{result.all_certified_products.length !== 1 ? 's' : ''}
                             </span>
                           </Button>
-                          {expandedRows[index] && (
+                          {expandedAllProducts[index] && (
                             <ScrollArea className="h-96 mt-2">
                               <div className="pr-4">
                                 <ul className="text-sm space-y-1.5 pl-2" data-testid={`list-all-products-${index}`}>
@@ -268,36 +328,86 @@ export function ResultsTable({ results }: ResultsTableProps) {
               {/* Matching Products */}
               {result.matching_products.length > 0 && (
                 <div>
-                  <div className="text-xs font-semibold text-muted-foreground uppercase mb-2">
-                    Matching Products ({result.matching_products.length})
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-xs font-semibold text-muted-foreground uppercase">
+                      Matching Products
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleMatchingProducts(index)}
+                      className="gap-1.5 h-8"
+                      data-testid={`button-expand-matching-${index}`}
+                    >
+                      {expandedMatchingProducts[index] ? (
+                        <>
+                          <ChevronDown className="h-4 w-4" />
+                          <span className="text-xs">Hide ({result.matching_products.length})</span>
+                        </>
+                      ) : (
+                        <>
+                          <ChevronRight className="h-4 w-4" />
+                          <span className="text-xs">Show ({result.matching_products.length})</span>
+                        </>
+                      )}
+                    </Button>
                   </div>
-                  <ScrollArea className="max-h-32">
-                    <ul className="text-sm space-y-1" data-testid={`list-matching-${index}`}>
-                      {result.matching_products.map((product, i) => (
-                        <li key={i} className="text-[hsl(var(--status-certified))]">
-                          • {product}
-                        </li>
-                      ))}
-                    </ul>
-                  </ScrollArea>
+                  {expandedMatchingProducts[index] && (
+                    <ScrollArea className="h-64 mt-2">
+                      <div className="pr-4">
+                        <ul className="text-sm space-y-1.5" data-testid={`list-matching-${index}`}>
+                          {result.matching_products.map((product, i) => (
+                            <li key={i} className="text-[hsl(var(--status-certified))] break-words">
+                              • {product}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </ScrollArea>
+                  )}
                 </div>
               )}
 
               {/* Missing Products */}
               {result.missing_products.length > 0 && (
                 <div>
-                  <div className="text-xs font-semibold text-muted-foreground uppercase mb-2">
-                    Missing Products ({result.missing_products.length})
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-xs font-semibold text-muted-foreground uppercase">
+                      Missing Products
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleMissingProducts(index)}
+                      className="gap-1.5 h-8"
+                      data-testid={`button-expand-missing-${index}`}
+                    >
+                      {expandedMissingProducts[index] ? (
+                        <>
+                          <ChevronDown className="h-4 w-4" />
+                          <span className="text-xs">Hide ({result.missing_products.length})</span>
+                        </>
+                      ) : (
+                        <>
+                          <ChevronRight className="h-4 w-4" />
+                          <span className="text-xs">Show ({result.missing_products.length})</span>
+                        </>
+                      )}
+                    </Button>
                   </div>
-                  <ScrollArea className="max-h-32">
-                    <ul className="text-sm space-y-1" data-testid={`list-missing-${index}`}>
-                      {result.missing_products.map((product, i) => (
-                        <li key={i} className="text-[hsl(var(--status-warning))]">
-                          • {product}
-                        </li>
-                      ))}
-                    </ul>
-                  </ScrollArea>
+                  {expandedMissingProducts[index] && (
+                    <ScrollArea className="h-64 mt-2">
+                      <div className="pr-4">
+                        <ul className="text-sm space-y-1.5" data-testid={`list-missing-${index}`}>
+                          {result.missing_products.map((product, i) => (
+                            <li key={i} className="text-[hsl(var(--status-warning))] break-words">
+                              • {product}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </ScrollArea>
+                  )}
                 </div>
               )}
 
@@ -311,11 +421,11 @@ export function ResultsTable({ results }: ResultsTableProps) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => toggleRow(index)}
+                      onClick={() => toggleAllProducts(index)}
                       className="gap-1.5 h-8"
                       data-testid={`button-expand-products-${index}`}
                     >
-                      {expandedRows[index] ? (
+                      {expandedAllProducts[index] ? (
                         <>
                           <ChevronDown className="h-4 w-4" />
                           <span className="text-xs">Hide ({result.all_certified_products.length})</span>
@@ -328,7 +438,7 @@ export function ResultsTable({ results }: ResultsTableProps) {
                       )}
                     </Button>
                   </div>
-                  {expandedRows[index] && (
+                  {expandedAllProducts[index] && (
                     <ScrollArea className="h-64 mt-2">
                       <div className="pr-4">
                         <ul className="text-sm space-y-1.5" data-testid={`list-all-products-${index}`}>
