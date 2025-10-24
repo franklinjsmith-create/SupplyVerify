@@ -204,7 +204,7 @@ export default function Home() {
           <div className="flex items-center gap-2">
             <FileUp className="h-6 w-6 text-primary" />
             <h1 className="text-xl font-semibold tracking-tight">
-              USDA Organic Operation Status & Product Verification Tool
+              USDA Organic Certification Verification Tool
             </h1>
           </div>
         </div>
@@ -213,9 +213,9 @@ export default function Home() {
       <main className="container max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-8 md:py-12">
         <Card className="mb-8">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Upload Operation Data</CardTitle>
+            <CardTitle className="text-2xl">Verify Organic Certification Data</CardTitle>
             <CardDescription>
-              Verify operation certification status and products against the USDA Organic Integrity Database
+              Upload operation NOP IDs and product names to confirm current USDA Organic certification status in real time, sourced directly from the USDA Organic Integrity Database.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -296,15 +296,7 @@ export default function Home() {
       <footer className="border-t border-border bg-card mt-16">
         <div className="container max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-6">
           <p className="text-sm text-muted-foreground text-center">
-            Data sourced from the{" "}
-            <a
-              href="https://organic.ams.usda.gov/integrity/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:underline"
-            >
-              USDA Organic Integrity Database
-            </a>
+            Data sourced live from the USDA Organic Integrity Database (OID).
           </p>
         </div>
       </footer>

@@ -135,7 +135,7 @@ export function TableInput({ onSubmit, disabled }: TableInputProps) {
         </Button>
 
         <p className="text-xs text-muted-foreground text-left sm:text-right max-w-md">
-          Enter the 10-digit NOP ID and comma-separated products for each operation. Products are optional.
+          Enter the 10-digit NOP ID and any products you wish to verify. Products are optional.
         </p>
       </div>
 
@@ -146,7 +146,7 @@ export function TableInput({ onSubmit, disabled }: TableInputProps) {
           size="lg"
           data-testid="button-verify-table"
         >
-          Verify Operations
+          Check Certification
         </Button>
       </div>
     </div>
