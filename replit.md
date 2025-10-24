@@ -139,6 +139,31 @@ Preferred communication style: Simple, everyday language.
 - Rationale: Streamlined manual entry for users with small datasets
 - Operation names automatically populated from USDA scraping (not manual input)
 
+## SEO and Branding
+
+**Production URL**: https://verifier.askorganicbot.com/
+
+**Page Title**: "USDA Organic Certification Verifier | AskOrganicBot"
+
+**Favicon**: AskOrganicBot leaf logo (green leaf in speech bubble with transparent background)
+- Currently uses single source image (`/favicon.png`) with multiple size declarations
+- Browsers automatically resize for 16x16, 32x32, 192x192, and 180x180 Apple touch icon
+- **Future optimization**: For best quality across all devices, generate separate optimized files for each size using a tool like RealFaviconGenerator (realfavicongenerator.net)
+
+**SEO Implementation**:
+- Comprehensive meta tags including description, keywords, and author
+- Open Graph tags for rich social media previews (Facebook, LinkedIn)
+- Twitter Card metadata for Twitter sharing
+- Canonical URL pointing to https://verifier.askorganicbot.com/
+- JSON-LD structured data (Schema.org WebApplication type) for Google rich snippets
+- Google Analytics tracking (GA4: G-TGQSKF1B9G)
+
+**Meta Description**: "Verify USDA organic certification status in real-time. Upload operation NOP IDs and product lists to check against the USDA Organic Integrity Database instantly. Free tool by AskOrganicBot."
+
+**Target Keywords**: USDA organic, NOP verification, organic certification, USDA OID, organic integrity database, certification verification tool, organic operations, NOP ID lookup
+
+**Future Migration**: Planned migration from verifier.askorganicbot.com to askorganicbot.com/verifier will require updating the canonical URL in index.html
+
 ## Deployment
 
 This application requires Playwright browser binaries to function in production. See **DEPLOYMENT.md** for comprehensive deployment instructions.

@@ -3,10 +3,74 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
+    
+    <!-- Favicon 
+         Note: Currently using single source image for all sizes. Browsers will resize automatically.
+         For optimal quality, generate separate 16x16, 32x32, 192x192, and 180x180 files using
+         a tool like RealFaviconGenerator (realfavicongenerator.net) -->
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png" />
+    
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Primary Meta Tags -->
+    <title>USDA Organic Certification Verifier | AskOrganicBot</title>
+    <meta name="title" content="USDA Organic Certification Verifier | AskOrganicBot" />
+    <meta name="description" content="Verify USDA organic certification status in real-time. Upload operation NOP IDs and product lists to check against the USDA Organic Integrity Database instantly. Free tool by AskOrganicBot." />
+    <meta name="keywords" content="USDA organic, NOP verification, organic certification, USDA OID, organic integrity database, certification verification tool, organic operations, NOP ID lookup" />
+    <meta name="author" content="AskOrganicBot" />
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://verifier.askorganicbot.com/" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://verifier.askorganicbot.com/" />
+    <meta property="og:title" content="USDA Organic Certification Verifier | AskOrganicBot" />
+    <meta property="og:description" content="Verify USDA organic certification status in real-time. Upload operation NOP IDs and product lists to check against the USDA Organic Integrity Database instantly." />
+    <meta property="og:image" content="https://verifier.askorganicbot.com/favicon.png" />
+    <meta property="og:site_name" content="AskOrganicBot Verifier" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:url" content="https://verifier.askorganicbot.com/" />
+    <meta name="twitter:title" content="USDA Organic Certification Verifier | AskOrganicBot" />
+    <meta name="twitter:description" content="Verify USDA organic certification status in real-time. Upload operation NOP IDs and product lists to check against the USDA Organic Integrity Database instantly." />
+    <meta name="twitter:image" content="https://verifier.askorganicbot.com/favicon.png" />
+    
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "USDA Organic Certification Verifier",
+      "description": "Verify USDA organic certification status in real-time. Upload operation NOP IDs and product lists to check against the USDA Organic Integrity Database instantly.",
+      "url": "https://verifier.askorganicbot.com/",
+      "applicationCategory": "BusinessApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "provider": {
+        "@type": "Organization",
+        "name": "AskOrganicBot",
+        "url": "https://askorganicbot.com"
+      },
+      "featureList": [
+        "Real-time USDA organic certification verification",
+        "Bulk NOP ID verification",
+        "Product certification status checking",
+        "CSV and Excel file upload support",
+        "Direct USDA Organic Integrity Database integration"
+      ]
+    }
+    </script>
     
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-TGQSKF1B9G"></script>
@@ -16,9 +80,6 @@
       gtag('js', new Date());
       gtag('config', 'G-TGQSKF1B9G');
     </script>
-    
-    <title>USDA Organic Verification Tool</title>
-    <meta name="description" content="Verify suppliers and ingredients against the USDA Organic Integrity Database. Upload spreadsheets or paste data to check certifications instantly.">
   </head>
   <body>
     <div id="root"></div>
